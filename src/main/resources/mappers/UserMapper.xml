@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gclogs.armyreportsystem.mapper.UserMapper">
+    
+    <insert id="insert" parameterType="com.gclogs.armyreportsystem.domain.User">
+        INSERT INTO User (
+            userId, password, role, name, email, 
+            createDate, modifiedDate, createdIP, currentIP, status
+        ) VALUES (
+            #{userId}, #{password}, #{role}, #{name}, #{email},
+            NOW(), NOW(), #{createdIP}, #{currentIP}, #{status}
+        )
+    </insert>
+
+    <update id="updateCurrentIP">
+        UPDATE User
+        SET currentIP = #{currentIP},
+            modifiedDate = NOW()
+        WHERE userId = #{userId}
+    </update>
+
+    <select id="findByUserId" resultType="com.gclogs.armyreportsystem.domain.User">
+        SELECT * FROM User WHERE userId = #{userId}
+    </select>
+
+    <select id="existsByUserId" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM User WHERE userId = #{userId})
+    </select>
+</mapper>
