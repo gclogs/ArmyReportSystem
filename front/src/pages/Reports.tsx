@@ -1,146 +1,119 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useReports } from '../hooks/useReports';
-import type { Report, ReportStatus, ReportPriority } from '../schemas/report';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ReportForm } from '../components/organisms/ReportForm';
+import { ReportList } from '../components/organisms/ReportList';
+import { ReportDetail } from '../components/organisms/ReportDetail';
+import { Button } from '../components/common/Button';
+import type { ReportFormData, Report, ReportStatus } from '../schemas/report';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
-  padding: 20px;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 `;
 
 const Title = styled.h1`
+  margin: 0;
   font-size: 24px;
-  color: #1a2236;
-`;
-
-const CreateButton = styled.button`
-  background-color: #1a73e8;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
   font-weight: 600;
-
-  &:hover {
-    background-color: #1557b0;
-  }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+const Content = styled.div`
+  display: grid;
+  gap: 24px;
 `;
 
-const Th = styled.th`
-  text-align: left;
-  padding: 12px 20px;
-  background-color: #f8f9fa;
-  color: #64748b;
-  font-weight: 600;
-  border-bottom: 1px solid #e2e8f0;
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 `;
 
-const Td = styled.td`
-  padding: 12px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  color: #1a2236;
-`;
-
-const StatusBadge = styled.span<{ status: ReportStatus }>`
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  
-  ${({ status }) => {
-    switch (status) {
-      case 'draft':
-        return 'background-color: #e2e8f0; color: #64748b;';
-      case 'pending':
-        return 'background-color: #fff7ed; color: #c2410c;';
-      case 'approved':
-        return 'background-color: #f0fdf4; color: #15803d;';
-      case 'rejected':
-        return 'background-color: #fef2f2; color: #b91c1c;';
-      default:
-        return '';
-    }
-  }}
-`;
-
-const PriorityBadge = styled.span<{ priority: ReportPriority }>`
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  
-  ${({ priority }) => {
-    switch (priority) {
-      case 'low':
-        return 'background-color: #f8fafc; color: #64748b;';
-      case 'medium':
-        return 'background-color: #fef3c7; color: #b45309;';
-      case 'high':
-        return 'background-color: #fee2e2; color: #b91c1c;';
-      case 'urgent':
-        return 'background-color: #dc2626; color: white;';
-      default:
-        return '';
-    }
-  }}
-`;
-
-const ActionButton = styled.button`
-  background: none;
-  border: none;
-  color: #1a73e8;
-  cursor: pointer;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 4px;
-
-  &:hover {
-    background-color: #f1f5f9;
-  }
+const ModalContent = styled.div`
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
 `;
 
 const Reports: React.FC = () => {
-  const { data: reports, isLoading } = useReports();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
-  const handleCreateReport = () => {
-    setIsCreateModalOpen(true);
+  const { data: reports = [], isLoading } = useQuery({
+    queryKey: ['reports'],
+    queryFn: async (): Promise<Report[]> => {
+      const response = await fetch('/api/reports');
+      if (!response.ok) throw new Error('보고서 목록을 불러오는데 실패했습니다.');
+      return response.json();
+    },
+  });
+
+  const createReportMutation = useMutation({
+    mutationFn: async ({ formData }: { formData: FormData }) => {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('보고서 생성에 실패했습니다.');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      setIsFormOpen(false);
+    },
+  });
+
+  const updateReportMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: ReportStatus }) => {
+      const response = await fetch(`/api/reports/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) throw new Error('보고서 상태 변경에 실패했습니다.');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+    },
+  });
+
+  const handleSubmit = async (_data: ReportFormData, formData: FormData) => {
+    try {
+      await createReportMutation.mutateAsync({ formData });
+    } catch (error) {
+      console.error('보고서 제출 중 오류:', error);
+    }
   };
 
-  const getStatusText = (status: ReportStatus): string => {
-    const statusMap: Record<ReportStatus, string> = {
-      draft: '임시저장',
-      pending: '승인대기',
-      approved: '승인완료',
-      rejected: '반려',
-    };
-    return statusMap[status];
-  };
-
-  const getPriorityText = (priority: ReportPriority): string => {
-    const priorityMap: Record<ReportPriority, string> = {
-      low: '낮음',
-      medium: '중간',
-      high: '높음',
-      urgent: '긴급',
-    };
-    return priorityMap[priority];
+  const handleStatusChange = async (reportId: string, newStatus: ReportStatus) => {
+    try {
+      await updateReportMutation.mutateAsync({ id: reportId, status: newStatus });
+    } catch (error) {
+      console.error('상태 변경 중 오류:', error);
+    }
   };
 
   if (isLoading) {
@@ -150,49 +123,38 @@ const Reports: React.FC = () => {
   return (
     <Container>
       <Header>
-        <Title>보고서 관리</Title>
-        <CreateButton onClick={handleCreateReport}>
-          새 보고서 작성
-        </CreateButton>
+        <Title>보고서</Title>
+        <Button onClick={() => setIsFormOpen(true)}>새 보고서 작성</Button>
       </Header>
 
-      <Table>
-        <thead>
-          <tr>
-            <Th>제목</Th>
-            <Th>작성자</Th>
-            <Th>상태</Th>
-            <Th>우선순위</Th>
-            <Th>작성일</Th>
-            <Th>작업</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {reports?.map((report) => (
-            <tr key={report.id}>
-              <Td>{report.title}</Td>
-              <Td>{report.authorId}</Td>
-              <Td>
-                <StatusBadge status={report.status}>
-                  {getStatusText(report.status)}
-                </StatusBadge>
-              </Td>
-              <Td>
-                <PriorityBadge priority={report.priority}>
-                  {getPriorityText(report.priority)}
-                </PriorityBadge>
-              </Td>
-              <Td>{new Date(report.createdAt).toLocaleDateString()}</Td>
-              <Td>
-                <ActionButton>상세보기</ActionButton>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <Content>
+        <ReportList
+          reports={reports}
+          onReportClick={setSelectedReport}
+        />
+      </Content>
 
-      {isCreateModalOpen && (
-        <div>보고서 작성 모달 (구현 예정)</div>
+      {isFormOpen && (
+        <Modal onClick={() => setIsFormOpen(false)}>
+          <ModalContent onClick={e => e.stopPropagation()}>
+            <ReportForm
+              onSubmit={handleSubmit}
+              isLoading={createReportMutation.isPending}
+            />
+          </ModalContent>
+        </Modal>
+      )}
+
+      {selectedReport && (
+        <Modal onClick={() => setSelectedReport(null)}>
+          <ModalContent onClick={e => e.stopPropagation()}>
+            <ReportDetail
+              report={selectedReport}
+              isOfficer={user?.role === 'OFFICER'}
+              onStatusChange={(status: ReportStatus) => handleStatusChange(selectedReport.id, status)}
+            />
+          </ModalContent>
+        </Modal>
       )}
     </Container>
   );

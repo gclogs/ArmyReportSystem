@@ -183,7 +183,7 @@ const Approvals: React.FC = () => {
                  report.priority === 'low' ? '낮음' : '긴급'}
               </PriorityBadge>
             </CardHeader>
-            
+
             <CardContent>
               <ContentText>{report.content}</ContentText>
             </CardContent>
