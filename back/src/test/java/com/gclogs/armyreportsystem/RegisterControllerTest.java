@@ -38,8 +38,6 @@ public class RegisterControllerTest {
         request.setUnitName("27사단77연대수송대대");
         request.setPhoneNumber("010-1234-5678");
         request.setEmail("test@army.mil.kr");
-        request.setCreatedIP("127.0.0.1");
-        request.setCurrentIP("127.0.0.1");
         request.setCreatedAt(LocalDateTime.now());
         request.setStatus(false);
 

@@ -4,23 +4,28 @@
     
     <insert id="insert" parameterType="com.gclogs.armyreportsystem.domain.User">
         INSERT INTO User (
-            userId, password, role, name, email, 
-            createDate, modifiedDate, createdIP, currentIP, status
+            userId, password, rank, role, name, unitName, phoneNumber, email,
+            createDate, status
         ) VALUES (
-            #{userId}, #{password}, #{role}, #{name}, #{email},
-            NOW(), NOW(), #{createdIP}, #{currentIP}, #{status}
+            #{userId}, #{password}, #{rank}, #{role}, #{name}, #{unitName}, #{phoneNumber}, #{email},
+            NOW(), #{status}
         )
     </insert>
 
-    <update id="updateCurrentIP">
-        UPDATE User
-        SET currentIP = #{currentIP},
-            modifiedDate = NOW()
-        WHERE userId = #{userId}
-    </update>
-
     <select id="findByUserId" resultType="com.gclogs.armyreportsystem.domain.User">
-        SELECT * FROM User WHERE userId = #{userId}
+        SELECT 
+            userId, 
+            password,
+            rank,
+            role,
+            name,
+            unitName,
+            phoneNumber,
+            email,
+            DATE_FORMAT(createDate, '%Y-%m-%d %H:%i:%s') as createdAt,
+            status
+        FROM User 
+        WHERE userId = #{userId}
     </select>
 
     <select id="existsByUserId" resultType="boolean">
