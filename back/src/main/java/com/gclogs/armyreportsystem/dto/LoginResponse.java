@@ -1,5 +1,6 @@
 package com.gclogs.armyreportsystem.dto;
 
+import com.gclogs.armyreportsystem.domain.User;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -7,8 +8,7 @@ import lombok.Getter;
 @Builder
 public class LoginResponse {
     private final boolean success;
-    private final String userId;
-    private final String username;
-    private final String role;
     private final String message;
+    private final String token;
+    private final User user;
 }
