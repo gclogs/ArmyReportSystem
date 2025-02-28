@@ -47,15 +47,14 @@ public class UserService {
         User user = User.builder()
                 .userId(request.getUserId())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRank())
+                .rank(request.getRank())
+                .role(request.getRole()) // 기본값은 솔져임 (승인 절차 거쳐 권한 얻음)
                 .name(request.getName())
                 .unitName(request.getUnitName())
                 .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
-                .createdIP(request.getCreatedIP())
-                .currentIP(request.getCurrentIP())
                 .createdAt(request.getCreatedAt())
-                .status(false) // 기본값은 비활성화 상태 (승인 필요)
+                .status(false) // 기본값은 0 (로그인시 1로 변경)
                 .build();
 
         userMapper.insert(user);
@@ -64,14 +63,15 @@ public class UserService {
                 .success(true)
                 .userId(user.getUserId())
                 .name(user.getName())
-                .rank(user.getRole())
-                .message("회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.")
+                .rank(user.getRank())
+                .role(user.getRole())
+                .message("회원가입이 완료되었습니다. 장교는 관리자 승인 절차를 거쳐 권한을 얻으시길 바랍니다.")
                 .build();
     }
 
     // 로그인 서비스 추가
     @Transactional
-    public LoginResponse login(LoginRequest request, String clientIp) {
+    public LoginResponse login(LoginRequest request) {
         // findByUserId로 사용자 조회
         User user = userMapper.findByUserId(request.getUserId());
 
@@ -91,16 +91,22 @@ public class UserService {
                     .build();
         }
 
-        // 로그인 성공 시 현재 IP 업데이트
-        userMapper.updateCurrentIP(user.getUserId(), "127.0.0.1");
+        // JWT 토큰 생성 (간단한 예시)
+        String token = generateToken(user);
 
         return LoginResponse.builder()
                 .success(true)
-                .userId(user.getUserId())
-                .username(user.getName())
-                .role(user.getRole())
                 .message("로그인에 성공하였습니다.")
+                .token(token)
+                .user(user)
                 .build();
+    }
+
+    // 간단한 토큰 생성 메서드 (실제 구현은 JWT 라이브러리 사용 권장)
+    private String generateToken(User user) {
+        // 실제 프로덕션에서는 JWT 라이브러리를 사용하여 구현해야 합니다.
+        // 이 예제에서는 간단히 사용자 ID와 현재 시간을 조합하여 토큰을 생성합니다.
+        return user.getUserId() + "_" + System.currentTimeMillis();
     }
 
     // 사용자 정보 조회 서비스
@@ -116,7 +122,7 @@ public class UserService {
                 .success(true)
                 .userId(user.getUserId())
                 .name(user.getName())
-                .rank(user.getRole())
+                .rank(user.getRank())
                 .email(user.getEmail())
                 .createdAt(user.getCreatedAt())
                 .message("사용자 정보 조회 성공")

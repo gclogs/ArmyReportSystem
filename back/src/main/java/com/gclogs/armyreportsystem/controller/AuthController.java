@@ -23,10 +23,8 @@ public class AuthController {
     // 회원가입
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
-        String clientIp = getClientIp(httpRequest);
-        request.setCreatedIP(clientIp);
-        request.setCurrentIP(clientIp);
         request.setCreatedAt(java.time.LocalDateTime.now());
+        request.setRole("SOLDIER"); // UserRole = 'SOLDIER' | 'OFFICER(장교)' | 'ADMIN(총관리자)'
         
         RegisterResponse registerData = userService.register(request);
         return ResponseEntity.ok(registerData);
@@ -34,9 +32,8 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        String clientIp = getClientIp(httpRequest);
-        LoginResponse loginData = userService.login(request, clientIp);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginResponse loginData = userService.login(request);
         return ResponseEntity.ok(loginData);
     }
 
@@ -55,14 +52,5 @@ public class AuthController {
                 .message(e.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    // 클라이언트 IP 가져오는 메서드
-    private String getClientIp(HttpServletRequest request) {
-        String clientIp = request.getHeader("X-Forwarded-For");
-        if (clientIp == null || clientIp.isEmpty() || "unknown".equalsIgnoreCase(clientIp)) {
-            clientIp = request.getRemoteAddr();
-        }
-        return clientIp;
     }
 }
