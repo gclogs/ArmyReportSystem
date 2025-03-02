@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Outlet } from 'react-router-dom';
 import Header from '../components/molecules/Header';
 import BottomNavigation from '../components/molecules/BottomNavigation';
 
@@ -13,15 +14,13 @@ const Main = styled.main`
   min-height: calc(100vh - 120px);
 `;
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC = () => {
   return (
     <LayoutContainer>
       <Header />
-      <Main>{children}</Main>
+      <Main>
+        <Outlet />
+      </Main>
       <BottomNavigation />
     </LayoutContainer>
   );
