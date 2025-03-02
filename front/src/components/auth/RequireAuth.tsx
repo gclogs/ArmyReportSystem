@@ -26,16 +26,3 @@ export function RequireAuth({ children, permissions = [] }: RequireAuthProps) {
 
   return <>{children}</>;
 }
-
-export function withAuth<P extends object>(
-  WrappedComponent: React.ComponentType<P>,
-  permissions: Permission[] = []
-) {
-  return function WithAuthComponent(props: P) {
-    return (
-      <RequireAuth permissions={permissions}>
-        <WrappedComponent {...props} />
-      </RequireAuth>
-    );
-  };
-}
