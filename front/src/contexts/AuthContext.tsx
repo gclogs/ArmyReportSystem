@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '../schemas/user';
+import { User } from '../schemas/user';
 import AuthService from '../services/auth';
 import { Permission, DEFAULT_PERMISSIONS } from '../schemas/auth';
 
