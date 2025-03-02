@@ -5,7 +5,7 @@
     <insert id="insert" parameterType="com.gclogs.armyreportsystem.domain.User">
         INSERT INTO User (
             userId, password, rank, role, name, unitName, phoneNumber, email,
-            createDate, status
+            createdAt, status
         ) VALUES (
             #{userId}, #{password}, #{rank}, #{role}, #{name}, #{unitName}, #{phoneNumber}, #{email},
             NOW(), #{status}
@@ -22,7 +22,7 @@
             unitName,
             phoneNumber,
             email,
-            DATE_FORMAT(createDate, '%Y-%m-%d %H:%i:%s') as createdAt,
+            DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s') as createdAt,
             status
         FROM User 
         WHERE userId = #{userId}
