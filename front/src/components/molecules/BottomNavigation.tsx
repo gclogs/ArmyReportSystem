@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useLocation } from 'react-router-dom';
+import { FaHouse, FaFile, FaCheck, FaGear } from 'react-icons/fa6';
 
 const NavContainer = styled.nav`
   height: 56px;
@@ -8,11 +9,16 @@ const NavContainer = styled.nav`
   bottom: 0;
   left: 0;
   right: 0;
+  width: 100%;
   display: flex;
   justify-content: space-around;
   background: #ffffff;
   border-top: 1px solid #f0f0f0;
   z-index: 100;
+
+  @media (max-width: 600px) {
+    height: 48px;
+  }
 `;
 
 const NavItem = styled(Link)<{ active: boolean }>`
@@ -40,11 +46,30 @@ const NavItem = styled(Link)<{ active: boolean }>`
 const NavText = styled.span`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: ${props => props.theme.active ? '500' : '400'};
+
+  @media (max-width: 600px) {
+    font-size: 10px;
+  }
 `;
 
 const BottomNavigation: React.FC = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+
+  const getIconByName = (name: string) => {
+    switch(name) {
+      case 'home':
+        return <FaHouse />;
+      case 'report':
+        return <FaFile />;
+      case 'confirm':
+        return <FaCheck />;
+      case 'setting':
+        return <FaGear />;
+      default:
+        return <FaHouse />;
+    }
+  }
 
   const navItems = [
     { path: '/', icon: 'home', label: '홈' },
@@ -61,7 +86,7 @@ const BottomNavigation: React.FC = () => {
           to={item.path} 
           active={currentPath === item.path}
         >
-          <item.icon />
+          {getIconByName(item.icon)}
           <NavText>{item.label}</NavText>
         </NavItem>
       ))}
