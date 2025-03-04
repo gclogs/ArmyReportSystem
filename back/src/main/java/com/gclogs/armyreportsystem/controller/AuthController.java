@@ -23,7 +23,6 @@ public class AuthController {
     // 회원가입
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
-        request.setCreatedAt(java.time.LocalDateTime.now());
         request.setRole("SOLDIER"); // UserRole = 'SOLDIER' | 'OFFICER(장교)' | 'ADMIN(총관리자)'
         
         RegisterResponse registerData = userService.register(request);
