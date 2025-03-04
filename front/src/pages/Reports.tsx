@@ -140,6 +140,7 @@ const Reports: React.FC = () => {
             <ReportForm
               onSubmit={handleSubmit}
               isLoading={createReportMutation.isPending}
+              onSuccess={() => setIsFormOpen(false)}
             />
           </ModalContent>
         </Modal>
