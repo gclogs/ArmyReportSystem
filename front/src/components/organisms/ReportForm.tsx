@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ReportFormSchema, type ReportFormData, type ReportType, type ReportPriority } from '../../schemas/report';
+import { ReportFormSchema, type ReportFormData } from '../../schemas/report';
 import CameraModal from '../molecules/CameraModal';
 import { Button } from '../common/Button';
+import { reportService } from '../../services/reportService';
+import { toast } from 'react-toastify';
 
 const FormContainer = styled.form`
   display: flex;
@@ -146,12 +148,14 @@ const RemoveButton = styled.button`
 interface ReportFormProps {
   onSubmit: (data: ReportFormData, formData: FormData) => void;
   isLoading?: boolean;
+  onSuccess?: () => void;
 }
 
-const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading }) => {
+const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLoading, onSuccess }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [images, setImages] = useState<{ id: string; blob: Blob }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, formState: { errors } } = useForm<ReportFormData>({
     resolver: zodResolver(ReportFormSchema)
@@ -172,32 +176,52 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading }) => {
   };
 
   const handleFormSubmit = async (data: ReportFormData) => {
-    // FormData 생성
-    const formData = new FormData();
-    
-    // 기본 데이터 추가
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
-        formData.append(key, value as string);
+    try {
+      setIsSubmitting(true);
+      
+      // FormData 생성
+      const formData = new FormData();
+      
+      // 기본 데이터 추가
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined) {
+          formData.append(key, value as string);
+        }
+      });
+      
+      // 파일 첨부
+      files.forEach((file, index) => {
+        formData.append(`attachment${index}`, file);
+      });
+
+      // 카메라로 찍은 이미지 추가
+      images.forEach((image, index) => {
+        formData.append(`image${index}`, image.blob, `image${index}.jpg`);
+      });
+
+      // 원본 데이터와 FormData 모두 전달
+      onSubmit({
+        ...data,
+        attachments: files
+      }, formData);
+      
+      // 백엔드로 데이터 전송
+      await reportService.createReportWithFormData(formData);
+      toast.success('보고서가 성공적으로 제출되었습니다.');
+      
+      // 성공 콜백 호출
+      if (onSuccess) {
+        onSuccess();
       }
-    });
-    
-    // 파일 첨부
-    files.forEach((file, index) => {
-      formData.append(`attachment${index}`, file);
-    });
-
-    // 카메라로 찍은 이미지 추가
-    images.forEach((image, index) => {
-      formData.append(`image${index}`, image.blob, `image${index}.jpg`);
-    });
-
-    // 원본 데이터와 FormData 모두 전달
-    onSubmit({
-      ...data,
-      attachments: files
-    }, formData);
+    } catch (error) {
+      console.error('보고서 제출 중 오류:', error);
+      toast.error('보고서 제출에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const isLoading = externalLoading || isSubmitting;
 
   return (
     <>
