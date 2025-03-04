@@ -73,9 +73,7 @@ const BottomNavigation: React.FC = () => {
 
   const navItems = [
     { path: '/', icon: 'home', label: '홈' },
-    { path: '/reports', icon: 'report', label: '보고서' },
-    { path: '/approvals', icon: 'confirm', label: '승인' },
-    { path: '/settings', icon: 'setting', label: '설정' }
+    { path: '/reports', icon: 'report', label: '보고서' }
   ];
 
   return (
