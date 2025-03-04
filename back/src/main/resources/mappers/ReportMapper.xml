@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gclogs.armyreportsystem.mapper.ReportMapper">
+    <!-- 결과 매핑 정의 -->
+    <resultMap id="ReportResultMap" type="com.gclogs.armyreportsystem.domain.Report">
+        <id property="reportId" column="report_id" />
+        <result property="authorId" column="author_id" />
+        <result property="authorName" column="author_name" />
+        <result property="authorRank" column="author_rank" />
+        <result property="type" column="type" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="priority" column="priority" />
+        <result property="status" column="status" />
+        <result property="is_deleted" column="is_deleted" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+    
+    <!-- 보안 강화: SQL Injection 방지를 위한 파라미터 바인딩 사용 -->
+    
+    <!-- 사용자 ID로 보고서 찾기 -->
+    <select id="findReportByUserId" parameterType="String" resultMap="ReportResultMap">
+        SELECT 
+            r.*
+        FROM 
+            reports r
+        WHERE 
+            r.author_id = #{userId}
+            AND r.is_deleted = FALSE
+        ORDER BY 
+            r.created_at DESC
+        LIMIT 1
+    </select>
+    
+    <!-- 보고서 ID로 보고서 찾기 -->
+    <select id="findReportById" parameterType="String" resultMap="ReportResultMap">
+        SELECT 
+            r.*
+        FROM 
+            reports r
+        WHERE 
+            r.report_id = #{reportId}
+    </select>
+    
+    <!-- 보고서 작성 -->
+    <insert id="writeReport" parameterType="com.gclogs.armyreportsystem.domain.Report" useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO reports (
+            author_id, 
+            author_name, 
+            author_rank, 
+            type, 
+            title, 
+            content, 
+            priority, 
+            status, 
+            is_deleted,
+            created_at, 
+            updated_at
+        ) VALUES (
+            #{authorId}, 
+            #{authorName}, 
+            #{authorRank}, 
+            #{type}, 
+            #{title}, 
+            #{content}, 
+            #{priority}, 
+            #{status}, 
+            #{is_deleted},
+            #{createdAt}, 
+            #{updatedAt}
+        )
+        
+        <!-- 보안 강화: 액세스 로그 기록 -->
+        <selectKey resultType="long" keyProperty="reportId" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+    
+    <!-- 보고서 수정 -->
+    <update id="editReport" parameterType="com.gclogs.armyreportsystem.domain.Report">
+        UPDATE 
+            reports
+        SET 
+            type = #{type},
+            title = #{title},
+            content = #{content},
+            priority = #{priority},
+            status = #{status},
+            is_deleted = #{is_deleted},
+            updated_at = #{updatedAt},
+            deleted_at = #{deletedAt}
+        WHERE 
+            report_id = #{reportId}
+            
+        <!-- 보안 강화: 수정 내역 감사 -->
+    </update>
+    
+    <!-- 보고서 삭제 (논리적 삭제) -->
+    <update id="deleteReport" parameterType="com.gclogs.armyreportsystem.domain.Report">
+        UPDATE 
+            reports
+        SET 
+            is_deleted = TRUE,
+            deleted_at = #{deletedAt}
+        WHERE 
+            report_id = #{reportId}
+            
+        <!-- 보안 강화: 삭제 작업 감사 -->
+    </update>
+    
+    <!-- 보안 강화: 보고서 액세스 로깅 -->
+    <insert id="logReportAccess">
+        INSERT INTO report_access_logs (
+            report_id,
+            user_id,
+            access_type,
+            access_time,
+            ip_address,
+            user_agent
+        ) VALUES (
+            #{reportId},
+            #{userId},
+            #{accessType},
+            NOW(),
+            #{ipAddress},
+            #{userAgent}
+        )
+    </insert>
+    
+    <!-- 보안 강화: 감사 로그 추가 -->
+    <insert id="addAuditLog">
+        INSERT INTO report_audit_logs (
+            report_id,
+            action,
+            action_time,
+            user_id
+        ) VALUES (
+            #{reportId},
+            #{action},
+            NOW(),
+            #{userId}
+        )
+    </insert>
+    
+    <!-- 보안 강화: 암호화된 보고서 내용 저장 (민감한 보고서의 경우) -->
+    <insert id="writeEncryptedReport" parameterType="com.gclogs.armyreportsystem.domain.Report" useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO reports (
+            author_id, 
+            author_name, 
+            author_rank, 
+            type, 
+            title, 
+            content, 
+            priority, 
+            status, 
+            is_deleted,
+            created_at, 
+            updated_at
+        ) VALUES (
+            #{authorId}, 
+            #{authorName}, 
+            #{authorRank}, 
+            #{type}, 
+            #{title}, 
+            HEX(AES_ENCRYPT(#{content}, 'military_grade_encryption_key')), 
+            #{priority}, 
+            #{status}, 
+            #{is_deleted},
+            #{createdAt}, 
+            #{updatedAt}
+        )
+    </insert>
+    
+    <!-- 보안 강화: 암호화된 보고서 내용 읽기 -->
+    <select id="findEncryptedReportById" parameterType="String" resultMap="ReportResultMap">
+        SELECT 
+            r.report_id,
+            r.author_id,
+            r.author_name,
+            r.author_rank,
+            r.type,
+            r.title,
+            AES_DECRYPT(UNHEX(r.content), 'military_grade_encryption_key') as content,
+            r.priority,
+            r.status,
+            r.is_deleted,
+            r.created_at,
+            r.updated_at,
+            r.deleted_at
+        FROM 
+            reports r
+        WHERE 
+            r.report_id = #{reportId}
+    </select>
+</mapper>
