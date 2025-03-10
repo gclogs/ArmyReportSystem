@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import Camera from '../molecules/Camera';
+import Camera from '../reports/Camera';
 
 const ModalOverlay = styled.div`
   position: fixed;
