@@ -29,7 +29,8 @@ const HeaderContainer = styled.header`
 const Brand = styled.div`
   font-size: 20px;
   font-weight: 600;
-  flex: 1;
+  margin-right: auto;
+  text-align: left;
 `;
 
 const IconsContainer = styled.div`
@@ -37,7 +38,7 @@ const IconsContainer = styled.div`
   align-items: center;
   gap: 16px;
   
-  @media (max-width: 600px) {
+  @media (max-width: 800px) {
     display: none;
   }
 `;
@@ -89,6 +90,10 @@ const LoginButton = styled(IconButton)`
 const MenuIcon = styled(IconButton)`
   position: relative;
   display: flex;
+  
+  @media (min-width: 800px) {
+    display: none;
+  }
 `;
 
 const DropdownMenu = styled.div<{ isOpen: boolean }>`
@@ -104,10 +109,6 @@ const DropdownMenu = styled.div<{ isOpen: boolean }>`
   opacity: ${({ isOpen }) => isOpen ? '1' : '0'};
   transform: ${({ isOpen }) => isOpen ? 'translateY(0)' : 'translateY(-10px)'};
   transition: opacity 0.2s ease, transform 0.2s ease;
-  
-  @media (max-width: 600px) {
-    display: none; /* Use full-screen mobile menu instead on small screens */
-  }
 `;
 
 const DropdownItem = styled.button`
@@ -129,7 +130,7 @@ const DropdownItem = styled.button`
 
 const Header: React.FC = () => {
   const { notifications, handleNotificationClick, markAsRead } = useNotifications();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -163,7 +164,7 @@ const Header: React.FC = () => {
 
   return (
     <HeaderContainer>
-      <Brand>군대보고체계</Brand>
+      <Brand>Aryshi</Brand>
       
       <MenuContainer ref={menuRef}>
         <MenuIcon onClick={toggleMenu} aria-label="메뉴">
@@ -176,7 +177,7 @@ const Header: React.FC = () => {
               <DropdownItem onClick={() => handleMenuItemClick('/notifications')}>알림</DropdownItem>
               <DropdownItem onClick={() => handleMenuItemClick('/profile')}>프로필</DropdownItem>
               <DropdownItem onClick={() => handleMenuItemClick('/settings')}>설정</DropdownItem>
-              <DropdownItem onClick={() => handleMenuItemClick('/logout')}>로그아웃</DropdownItem>
+              <DropdownItem onClick={() => logout()}>로그아웃</DropdownItem>
             </>
           ) : (
             <DropdownItem onClick={handleLoginClick}>로그인</DropdownItem>

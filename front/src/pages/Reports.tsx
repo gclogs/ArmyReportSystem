@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ReportForm } from '../components/organisms/ReportForm';
-import { ReportList } from '../components/organisms/ReportList';
-import { ReportDetail } from '../components/organisms/ReportDetail';
+import { ReportForm } from '../components/reports/ReportForm';
+import { ReportList } from '../components/reports/ReportList';
+import { ReportDetail } from '../components/reports/ReportDetail';
 import { Button } from '../components/common/Button';
 import type { ReportFormData, Report, ReportStatus } from '../schemas/report';
 import { useAuth } from '../contexts/AuthContext';

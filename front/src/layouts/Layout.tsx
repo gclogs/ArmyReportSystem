@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Outlet } from 'react-router-dom';
-import Header from '../components/molecules/Header';
-import BottomNavigation from '../components/molecules/BottomNavigation';
+import Header from '../components/common/Header';
+import BottomNavigation from '../components/common/BottomNavigation';
 
 const LayoutContainer = styled.div`
   width: 100%;

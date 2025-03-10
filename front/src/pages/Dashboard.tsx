@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import DashboardStats from '../components/organisms/DashboardStats';
-import DashboardCharts from '../components/organisms/DashboardCharts';
-import { ReportList } from '../components/organisms/ReportList';
+import DashboardStats from '../components/dashboards/DashboardStats';
+import DashboardCharts from '../components/dashboards/DashboardCharts';
+import { ReportList } from '../components/reports/ReportList';
 import type { ReportStatistics, UnitStatistics } from '../schemas/dashboard';
 import { Report } from '../schemas/report';
 

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ReportFormSchema, type ReportFormData } from '../../schemas/report';
-import CameraModal from '../molecules/CameraModal';
+import CameraModal from './CameraModal';
 import { Button } from '../common/Button';
 import { reportService } from '../../services/reportService';
 import { toast } from 'react-toastify';
