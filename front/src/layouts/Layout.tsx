@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/common/Header';
-import BottomNavigation from '../components/common/BottomNavigation';
+import HeaderTab from '../components/common/HeaderTab';
 
 const LayoutContainer = styled.div`
   width: 100%;
@@ -22,10 +22,10 @@ const Layout: React.FC = () => {
   return (
     <LayoutContainer>
       <Header />
+      <HeaderTab />
       <Main>
         <Outlet />
       </Main>
-      <BottomNavigation />
     </LayoutContainer>
   );
 };

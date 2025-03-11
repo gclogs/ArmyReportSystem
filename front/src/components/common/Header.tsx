@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { FaBars } from "react-icons/fa6";
 
 const HeaderContainer = styled.header`
+  display: flex;
   height: 64px;
-  position: fixed;
   top: 0;
   left: 0;
   right: 0;
