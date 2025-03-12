@@ -43,7 +43,7 @@ const HomeTab: React.FC = () => {
             <TabLink 
                 isActive={location.pathname === '/reports/recommended'}
                 onClick={() => handleTabClick('/reports/recommended')}>
-                    필독
+                    필독f
             </TabLink>
             <TabLink 
                 isActive={location.pathname === '/reports/recent'}
