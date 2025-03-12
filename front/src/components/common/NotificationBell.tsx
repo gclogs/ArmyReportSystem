@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Notification } from '../../schemas/notification';
+import { FaBell } from 'react-icons/fa';
 
 const BellContainer = styled.button`
   position: relative;
@@ -98,7 +99,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
 
   return (
     <BellContainer onClick={() => setIsOpen(!isOpen)}>
-      알림
+      <FaBell />
       {unreadCount > 0 && <Badge>{unreadCount}</Badge>}
       <NotificationPanel isOpen={isOpen}>
         <NotificationList>
