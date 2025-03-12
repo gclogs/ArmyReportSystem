@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/common/Header';
-import HeaderTab from '../components/common/HeaderTab';
+import HomeTab from '../components/home/HomeTab';
 
 const LayoutContainer = styled.div`
   width: 100%;
@@ -22,7 +22,7 @@ const Layout: React.FC = () => {
   return (
     <LayoutContainer>
       <Header />
-      <HeaderTab />
+      <HomeTab />
       <Main>
         <Outlet />
       </Main>
