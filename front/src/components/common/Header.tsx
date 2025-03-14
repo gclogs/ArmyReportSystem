@@ -5,6 +5,7 @@ import { useNotifications } from '../../hooks/useNotifications';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaBars } from "react-icons/fa6";
+import { FaSearch } from 'react-icons/fa';
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -37,10 +38,6 @@ const IconsContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
-  
-  @media (max-width: 800px) {
-    display: none;
-  }
 `;
 
 const MenuContainer = styled.div`
@@ -48,10 +45,6 @@ const MenuContainer = styled.div`
   display: flex;
   align-items: center;
   margin-right: 16px;
-  
-  @media (max-width: 600px) {
-    margin-right: 0;
-  }
 `;
 
 const IconButton = styled.button`
@@ -90,10 +83,6 @@ const LoginButton = styled(IconButton)`
 const MenuIcon = styled(IconButton)`
   position: relative;
   display: flex;
-  
-  @media (min-width: 800px) {
-    display: none;
-  }
 `;
 
 const DropdownMenu = styled.div<{ isOpen: boolean }>`
@@ -147,7 +136,7 @@ const Header: React.FC = () => {
     navigate(path);
     setMenuOpen(false);
   };
-
+  
   // Close the menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -166,38 +155,27 @@ const Header: React.FC = () => {
     <HeaderContainer>
       <Brand>Aryshi</Brand>
       
-      <MenuContainer ref={menuRef}>
-        <MenuIcon onClick={toggleMenu} aria-label="메뉴">
-          <FaBars />
-        </MenuIcon>
-        <DropdownMenu isOpen={menuOpen}>
-          {isAuthenticated ? (
-            <>
-              <DropdownItem onClick={() => handleMenuItemClick('/search')}>검색</DropdownItem>
-              <DropdownItem onClick={() => handleMenuItemClick('/notifications')}>알림</DropdownItem>
-              <DropdownItem onClick={() => handleMenuItemClick('/profile')}>프로필</DropdownItem>
-              <DropdownItem onClick={() => handleMenuItemClick('/settings')}>설정</DropdownItem>
-              <DropdownItem onClick={() => logout()}>로그아웃</DropdownItem>
-            </>
-          ) : (
-            <DropdownItem onClick={handleLoginClick}>로그인</DropdownItem>
-          )}
-        </DropdownMenu>
-      </MenuContainer>
       
       {isAuthenticated ? (
         <IconsContainer>
           <IconButton aria-label="검색">
-            검색
+            <FaSearch />
           </IconButton>
           <NotificationBell
             notifications={notifications}
             onNotificationClick={handleNotificationClick}
             onMarkAsRead={markAsRead}
           />
-          <IconButton aria-label="프로필">
-            프로필
-          </IconButton>
+          <MenuContainer ref={menuRef}>
+            <MenuIcon onClick={toggleMenu} aria-label="메뉴">
+              <FaBars />
+            </MenuIcon>
+            <DropdownMenu isOpen={menuOpen}>
+              <DropdownItem onClick={() => handleMenuItemClick('/profile')}>프로필</DropdownItem>
+              <DropdownItem onClick={() => handleMenuItemClick('/settings')}>설정</DropdownItem>
+              <DropdownItem onClick={() => logout()}>로그아웃</DropdownItem>
+            </DropdownMenu>
+          </MenuContainer>
         </IconsContainer>
       ) : (
         <IconsContainer>
