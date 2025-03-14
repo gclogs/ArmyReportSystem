@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ReportFormSchema, type ReportFormData } from '../../schemas/report';
 import CameraModal from './CameraModal';
 import { Button } from '../common/Button';
-import { reportService } from '../../services/reportService';
 import { toast } from 'react-toastify';
 
 const FormContainer = styled.form`
@@ -204,10 +203,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
         ...data,
         attachments: files
       }, formData);
-      
-      // 백엔드로 데이터 전송
-      await reportService.createReportWithFormData(formData);
-      toast.success('보고서가 성공적으로 제출되었습니다.');
       
       // 성공 콜백 호출
       if (onSuccess) {

@@ -1,6 +1,5 @@
 import { Report, ReportFilter, ReportFormData } from '../types/report';
-
-const API_BASE_URL = '/api';
+import AuthService from './auth';
 
 export const reportService = {
   async getReports(filter?: ReportFilter): Promise<Report[]> {
@@ -10,34 +9,32 @@ export const reportService = {
       }
       return acc;
     }, {} as Record<string, string>))}` : '';
-    const response = await fetch(`${API_BASE_URL}/reports${queryParams}`);
+    const response = await fetch(`api/reports${queryParams}`);
     if (!response.ok) throw new Error('Failed to fetch reports');
     return response.json();
   },
 
   async getReportById(id: string): Promise<Report> {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}`);
+    const response = await fetch(`api/reports/${id}`);
     if (!response.ok) throw new Error('Failed to fetch report');
     return response.json();
   },
 
-  async createReport(data: ReportFormData): Promise<Report> {
-    const response = await fetch(`${API_BASE_URL}/reports`, {
+  async createReportWithFormData(formData: FormData): Promise<Report> {
+    const authService = AuthService.getInstance();
+    const token = authService.getToken();
+    const user = authService.getUser();
+
+    if(!token || !user) {
+      throw new Error('인증 정보가 없습니다. 다시 로그인하세요.');
+    }
+
+    const response = await fetch(`api/reports`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'userId': user.id,
       },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to create report');
-    return response.json();
-  },
-
-  async createReportWithFormData(formData: FormData): Promise<Report> {
-    const response = await fetch(`${API_BASE_URL}/reports`, {
-      method: 'POST',
-      // FormData를 사용할 때는 Content-Type 헤더를 설정하지 않음
-      // 브라우저가 자동으로 multipart/form-data와 boundary를 설정함
       body: formData,
     });
     if (!response.ok) throw new Error('Failed to create report');
@@ -45,7 +42,7 @@ export const reportService = {
   },
 
   async updateReport(id: string, data: Partial<ReportFormData>): Promise<Report> {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}`, {
+    const response = await fetch(`api/reports/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -57,14 +54,14 @@ export const reportService = {
   },
 
   async deleteReport(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}`, {
+    const response = await fetch(`api/reports/${id}`, {
       method: 'DELETE',
     });
     if (!response.ok) throw new Error('Failed to delete report');
   },
 
   async approveReport(id: string, comment?: string): Promise<Report> {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}/approve`, {
+    const response = await fetch(`api/reports/${id}/approve`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -76,7 +73,7 @@ export const reportService = {
   },
 
   async rejectReport(id: string, reason: string): Promise<Report> {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}/reject`, {
+    const response = await fetch(`api/reports/${id}/reject`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

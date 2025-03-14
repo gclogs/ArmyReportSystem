@@ -7,6 +7,7 @@ import { ReportDetail } from '../components/reports/ReportDetail';
 import { Button } from '../components/common/Button';
 import type { ReportFormData, Report, ReportStatus } from '../schemas/report';
 import { useAuth } from '../contexts/AuthContext';
+import apiClient from '../services/apiClient';
 
 const Container = styled.div`
   padding: 24px;
@@ -72,31 +73,34 @@ const Reports: React.FC = () => {
 
   const createReportMutation = useMutation({
     mutationFn: async ({ formData }: { formData: FormData }) => {
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        body: formData,
+      const response = await apiClient.post('/reports', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
-      if (!response.ok) throw new Error('보고서 생성에 실패했습니다.');
-      return response.json();
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       setIsFormOpen(false);
     },
+    onError: (error) => {
+      console.error('보고서 생성 중 오류:', error);
+    },
   });
 
   const updateReportMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: ReportStatus }) => {
-      const response = await fetch(`/api/reports/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+      const response = await apiClient.patch(`/reports/${id}`, {
+        status
       });
-      if (!response.ok) throw new Error('보고서 상태 변경에 실패했습니다.');
-      return response.json();
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reports'] });
+    },
+    onError: (error) => {
+      console.error('상태 변경 중 오류:', error);
     },
   });
 
