@@ -38,7 +38,7 @@ public class ReportResponse {
     private String authorRank;
 
     // 첨부 파일 및 댓글
-    private List<ReportFileInputResponse> reportFileInputs; // 첨부 파일 목록
+    private List<FileAttachmentResponse> fileAttachments; // 첨부 파일 목록
     private List<CommentResponse> comments;       // 댓글 목록
 
     // 내부 클래스 - 첨부 파일 응답
@@ -47,7 +47,7 @@ public class ReportResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ReportFileInputResponse {
+    public static class FileAttachmentResponse {
         private String id;                 // 첨부 파일 ID
         private String fileUrl;            // 파일 URL
         private String fileName;           // 파일 이름
