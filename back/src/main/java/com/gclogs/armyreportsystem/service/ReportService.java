@@ -9,15 +9,19 @@ import com.gclogs.armyreportsystem.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ReportService {
     private final ReportMapper reportMapper;
     private final UserMapper userMapper;
+
+    private FileStrorageService fileStrorageService;
 
     @Transactional
     public ReportResponse writeReport(ReportRequest request, String userId) {
@@ -60,9 +64,39 @@ public class ReportService {
                 .updatedAt(report.getUpdatedAt())
                 .authorId(report.getAuthorId())
                 .authorName(report.getAuthorName())
-                .reportFileInputs(new ArrayList<>())  // 첨부 파일은 나중에 구현
+                .fileAttachments(new ArrayList<>())  // 첨부 파일은 나중에 구현
                 .comments(new ArrayList<>())     // 댓글은 나중에 구현
                 .build();
+    }
+
+    @Transactional
+    public ReportResponse writeReportWithFiles(ReportRequest request, List<MultipartFile> attachments, String userId) {
+        User user = userMapper.findByUserId(userId);
+        if (user == null) {
+            return ReportResponse.builder()
+                    .success(false)
+                    .message("사용자 정보를 찾을 수 없습니다.")
+                    .build();
+        }
+
+        try {
+            List<String> fileNames = new ArrayList<>();
+            if (attachments != null && !attachments.isEmpty()) {
+                for(MultipartFile attachment : attachments) {
+                    if(!attachment.isEmpty()) {
+                        String fileName = fileStrorageService.storeFile(attachment);
+                        fileNames.add(fileName);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return ReportResponse.builder()
+                    .success(false)
+                    .message("파일 업로드중에 오류가 발생하였습니다." + e.getMessage())
+                    .build();
+        }
+
+        return writeReport(request, userId);
     }
     
     @Transactional(readOnly = true)
@@ -97,7 +131,7 @@ public class ReportService {
                 .updatedAt(report.getUpdatedAt())
                 .authorId(report.getAuthorId())
                 .authorName(report.getAuthorName())
-                .reportFileInputs(new ArrayList<>())  // 첨부 파일은 나중에 구현
+                .fileAttachments(new ArrayList<>())  // 첨부 파일은 나중에 구현
                 .comments(new ArrayList<>())     // 댓글은 나중에 구현
                 .build();
     }
@@ -146,7 +180,7 @@ public class ReportService {
                 .updatedAt(existingReport.getUpdatedAt())
                 .authorId(existingReport.getAuthorId())
                 .authorName(existingReport.getAuthorName())
-                .reportFileInputs(new ArrayList<>())
+                .fileAttachments(new ArrayList<>())
                 .comments(new ArrayList<>())
                 .build();
     }
