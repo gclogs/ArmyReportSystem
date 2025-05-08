@@ -57,6 +57,9 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="reports" element={<Reports />} />
               <Route path="reports/:id" element={<Reports />} />
+              <Route path="reports/recommend" element={<Reports />} />
+              <Route path="reports/recent" element={<Reports />} />
+              <Route path="reports/me" element={<Reports />} />
               <Route path="approvals" element={<Approvals />} />
             </Route>
             

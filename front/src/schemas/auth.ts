@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import axios from 'axios';
 
 export const RoleSchema = z.enum(['SOLDIER', 'OFFICER', 'ADMIN']);
 export const RankSchema = z.enum([
@@ -99,3 +100,15 @@ export type Rank = z.infer<typeof RankSchema>;
 export type Unit = z.infer<typeof UnitSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type Permission = z.infer<typeof PermissionSchema>;
+
+// Axios 인스턴스 설정을 위한 타입
+export const ApiResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string().optional(),
+  data: z.unknown().optional(),
+  errors: z.array(z.string()).optional(),
+});
+
+export type ApiResponse<T = unknown> = z.infer<typeof ApiResponseSchema> & {
+  data?: T;
+};

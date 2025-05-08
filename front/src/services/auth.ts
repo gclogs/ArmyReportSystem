@@ -1,4 +1,5 @@
 import { User } from '../schemas/user';
+import api from '../utils/api';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
@@ -6,6 +7,8 @@ const USER_KEY = 'auth_user';
 interface LoginResponse {
   token: string;
   user: User;
+  success: boolean;
+  message?: string;
 }
 
 class AuthService {
@@ -14,7 +17,6 @@ class AuthService {
   private user: User | null = null;
 
   private constructor() {
-    // 로컬 스토리지에서 인증 정보 복구
     const tokenStr = localStorage.getItem(TOKEN_KEY);
     const userStr = localStorage.getItem(USER_KEY);
 
@@ -42,20 +44,19 @@ class AuthService {
 
   public async login(userId: string, password: string): Promise<void> {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, password }),
+      const response = await api.post<LoginResponse>('/api/auth/login', {
+        userId, 
+        password
       });
 
-      if (!response.ok) {
-        throw new Error('로그인에 실패했습니다.');
-      }
-
-      const data = await response.json() as LoginResponse;
+      const data = response.data;
       
+      // 로그인 실패 처리
+      if (!data.success) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      // 토큰과 사용자 데이터 확인
       if (!data.token || !data.user) {
         throw new Error('Invalid response data');
       }
@@ -81,32 +82,22 @@ class AuthService {
     email?: string
   ): Promise<void> {
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          password,
-          name,
-          rank,
-          unitName,
-          phoneNumber,
-          email,
-        }),
+      await api.post('/api/auth/register', {
+        userId,
+        password,
+        name,
+        rank,
+        unitName,
+        phoneNumber,
+        email,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || '회원가입에 실패했습니다.');
-      }
       
       // Registration successful, but no need to set token or user
       // as the user will need to be approved before logging in
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
-      throw error;
+      const errorMessage = error.response?.data?.message || '회원가입에 실패했습니다.';
+      throw new Error(errorMessage);
     }
   }
 
@@ -120,17 +111,8 @@ class AuthService {
     }
 
     try {
-      const response = await fetch('/api/auth/me', {
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        this.logout();
-        return null;
-      }
-
-      const data = await response.json();
-      this.user = data.user;
+      const response = await api.get('/api/auth/me');
+      this.user = response.data.user;
       return this.user;
     } catch (error) {
       console.error('Failed to get current user:', error);
@@ -158,7 +140,7 @@ class AuthService {
     return !!this.token;
   }
 
-  public getAuthHeaders(): HeadersInit {
+  public getAuthHeaders(): Record<string, string> {
     return this.token
       ? {
           Authorization: `Bearer ${this.token}`,

@@ -145,15 +145,15 @@ const RemoveButton = styled.button`
 `;
 
 interface ReportFormProps {
-  onSubmit: (data: ReportFormData, formData: FormData) => void;
+  onSubmit: (formData: FormData) => void;
   isLoading?: boolean;
   onSuccess?: () => void;
 }
 
 const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLoading, onSuccess }) => {
   const [files, setFiles] = useState<File[]>([]);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [images, setImages] = useState<{ id: string; blob: Blob }[]>([]);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, formState: { errors } } = useForm<ReportFormData>({
@@ -196,13 +196,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
       // 카메라로 찍은 이미지 추가
       images.forEach((image, index) => {
         formData.append(`image${index}`, image.blob, `image${index}.jpg`);
-      });
+      }); 
 
       // 원본 데이터와 FormData 모두 전달
-      onSubmit({
-        ...data,
-        attachments: files
-      }, formData);
+      onSubmit(formData);
       
       // 성공 콜백 호출
       if (onSuccess) {
@@ -210,7 +207,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
       }
     } catch (error) {
       console.error('보고서 제출 중 오류:', error);
-      toast.error('보고서 제출에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
     }

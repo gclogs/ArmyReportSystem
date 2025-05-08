@@ -182,19 +182,8 @@ const Reports: React.FC = () => {
   const { data: reports = [], isLoading } = useQuery({
     queryKey: ['reports', location.pathname],
     queryFn: async (): Promise<Report[]> => {
-      // 실제 API 호출
       try {
-        const path = location.pathname;
-        let endpoint = '/api/reports';
-        
-        // 경로에 따라 다른 API 엔드포인트 사용
-        if (path.includes('/reports/recommended')) {
-          endpoint = '/api/reports/recommended';
-        } else if (path.includes('/reports/recent')) {
-          endpoint = '/api/reports/recent';
-        } else if (path.includes('/reports/me')) {
-          endpoint = '/api/reports/me';
-        }
+        const endpoint = '/reports/list';
         
         const response = await apiClient.get(endpoint);
         return response.data;
@@ -209,14 +198,14 @@ const Reports: React.FC = () => {
     mutationFn: async ({ formData }: { formData: FormData }) => {
       const response = await apiClient.post('/reports', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json',
+          'userId': user?.id
         }
       });
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reports'] });
-      setIsFormOpen(false);
     },
     onError: (error) => {
       console.error('보고서 생성 중 오류:', error);
@@ -238,7 +227,7 @@ const Reports: React.FC = () => {
     },
   });
 
-  const handleSubmit = async (_data: ReportFormData, formData: FormData) => {
+  const handleSubmit = async (formData: FormData) => {
     try {
       await createReportMutation.mutateAsync({ formData });
     } catch (error) {
@@ -257,7 +246,7 @@ const Reports: React.FC = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
+  
   // 경로 변경 시 검색어 초기화
   useEffect(() => {
     setSearchTerm('');
@@ -277,7 +266,7 @@ const Reports: React.FC = () => {
         return false;
       }
       
-      if (path.includes('/reports/recommended')) {
+      if (path.includes('/reports/recommend')) {
         // 필독 목록 (우선순위가 'urgent' 또는 'high')
         return report.priority === 'urgent' || report.priority === 'high';
       } else if (path.includes('/reports/recent')) {
