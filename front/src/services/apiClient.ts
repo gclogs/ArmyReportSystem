@@ -3,7 +3,7 @@ import AuthService from './auth';
 
 // Axios 인스턴스 생성
 const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: 'http://localhost:8080/api',
 });
 
 // 요청 인터셉터 설정
