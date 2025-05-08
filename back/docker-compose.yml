@@ -9,7 +9,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_HIKARI_JDBC_URL=jdbc:mariadb://db:3306/army?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_HIKARI_USERNAME=root
-      - SPRING_DATASOURCE_HIKARI_PASSWORD=202120013
+      - SPRING_DATASOURCE_HIKARI_PASSWORD=root123
       - FILE_UPLOAD_DIR=/app/uploads
     volumes:
       - uploads_data:/app/uploads
@@ -22,7 +22,7 @@ services:
   db:
     image: mariadb:10.6
     environment:
-      - MYSQL_ROOT_PASSWORD=202120013
+      - MYSQL_ROOT_PASSWORD=root123
       - MYSQL_DATABASE=army
     ports:
       - "3306:3306"
@@ -30,7 +30,7 @@ services:
       - mariadb_data:/var/lib/mysql
       - ./src/main/resources/db:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p202120013"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
       interval: 5s
       timeout: 5s
       retries: 10
