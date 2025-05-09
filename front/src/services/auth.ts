@@ -44,7 +44,7 @@ class AuthService {
 
   public async login(userId: string, password: string): Promise<void> {
     try {
-      const response = await api.post<LoginResponse>('/api/auth/login', {
+      const response = await api.post<LoginResponse>('/auth/login', {
         userId, 
         password
       });
@@ -82,7 +82,7 @@ class AuthService {
     email?: string
   ): Promise<void> {
     try {
-      await api.post('/api/auth/register', {
+      await api.post('/auth/register', {
         userId,
         password,
         name,
@@ -111,7 +111,7 @@ class AuthService {
     }
 
     try {
-      const response = await api.get('/api/auth/me');
+      const response = await api.get('/auth/me');
       this.user = response.data.user;
       return this.user;
     } catch (error) {
