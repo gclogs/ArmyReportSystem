@@ -1,5 +1,5 @@
 import { User } from '../schemas/user';
-import api from '../utils/api';
+import api from './apiClient';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';

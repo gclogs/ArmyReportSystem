@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReportForm } from '../components/reports/ReportForm';
 import { ReportList } from '../components/reports/ReportList';
 import { ReportDetail } from '../components/reports/ReportDetail';
@@ -26,10 +26,11 @@ const colors = {
 
 const Container = styled.div`
   padding: 24px;
-  max-width: 1200px;
+  padding-left: 60px;
+  padding-right: 60px;
   margin: 0 auto;
   min-height: 100vh;
-  background-color: #F8F8F8;
+  background-color: ${colors.background};
 `;
 
 const Header = styled.div`
@@ -171,73 +172,87 @@ const ModalContent = styled.div`
 
 const Reports: React.FC = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const location = useLocation();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isGridView, setIsGridView] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isGridView, setIsGridView] = useState(false);
+  const queryClient = useQueryClient();
 
-  // 보고서 데이터 가져오기
-  const { data: reports = [], isLoading } = useQuery({
-    queryKey: ['reports', location.pathname],
-    queryFn: async (): Promise<Report[]> => {
+  // 경로 변경 시 검색어 초기화
+  useEffect(() => {
+    setSearchTerm('');
+  }, [location.pathname]);
+
+  // 모든 보고서 가져오기
+  const { data: reports, isLoading, error } = useQuery<Report[]>({
+    queryKey: ['reports'],
+    queryFn: async () => {
       try {
-        const endpoint = '/reports/list';
-        
-        const response = await apiClient.get(endpoint);
+        const response = await apiClient.get('/reports/list');
         return response.data;
       } catch (error) {
-        console.error('보고서 목록을 불러오는데 실패했습니다:', error);
-        throw new Error('보고서 목록을 불러오는데 실패했습니다.');
+        console.error('보고서 가져오기 실패:', error);
+        return [];
       }
-    },
+    }
   });
 
-  const createReportMutation = useMutation({
-    mutationFn: async ({ formData }: { formData: FormData }) => {
+  // 보고서 작성 함수
+  const createReport = async (formData: FormData) => {
+
+    try {
+      // 사용자 인증 확인
+      if (!user) {
+        throw new Error('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
+      }
+
+      if (!user.id) {
+        console.error('사용자 ID가 없습니다:', user);
+        throw new Error('사용자 정보가 올바르지 않습니다. 다시 로그인해주세요.');
+      }
+
+      
       const response = await apiClient.post('/reports', formData, {
         headers: {
-          'Content-Type': 'application/json',
-          'userId': user?.id
+          'userId': user.userId
         }
       });
-      return response.data;
-    },
-    onSuccess: () => {
+      
+      console.log('보고서 생성 응답:', response.data);
       queryClient.invalidateQueries({ queryKey: ['reports'] });
-    },
-    onError: (error) => {
+      return response.data;
+    } catch (error) {
       console.error('보고서 생성 중 오류:', error);
-    },
-  });
+      throw error;
+    }
+  };
 
-  const updateReportMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: ReportStatus }) => {
-      const response = await apiClient.patch(`/reports/${id}`, {
-        status
-      });
+  // 보고서 상태 업데이트 함수
+  const updateReportStatus = async (id: string, status: ReportStatus) => {
+    try {
+      const response = await apiClient.put(`/reports/${id}/status`, { status });
+      // 성공 시 보고서 목록 리프레시
+      queryClient.invalidateQueries({ queryKey: ['reports']});
       return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
-    },
-    onError: (error) => {
-      console.error('상태 변경 중 오류:', error);
-    },
-  });
+    } catch (error) {
+      console.error('상태 업데이트 중 오류:', error);
+      throw error;
+    }
+  };
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      await createReportMutation.mutateAsync({ formData });
+      await createReport(formData);
+      // 성공 시 추가 로직이 필요하다면 여기에 추가
     } catch (error) {
-      console.error('보고서 제출 중 오류:', error);
+      console.error('제출 중 오류:', error);
     }
   };
 
   const handleStatusChange = async (reportId: string, newStatus: ReportStatus) => {
     try {
-      await updateReportMutation.mutateAsync({ id: reportId, status: newStatus });
+      await updateReportStatus(reportId, newStatus);
     } catch (error) {
       console.error('상태 변경 중 오류:', error);
     }
@@ -246,19 +261,15 @@ const Reports: React.FC = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  
-  // 경로 변경 시 검색어 초기화
-  useEffect(() => {
-    setSearchTerm('');
-  }, [location.pathname]);
-  
+
   // URL에 따라 필터링된 보고서 목록
   const getFilteredReports = () => {
     if (!reports || reports.length === 0) return [];
-    
-    return reports.filter(report => {
+
+    // 검색어와 기본 필터링 적용
+    const filteredReports = reports.filter(report => {
       const path = location.pathname;
-      
+
       // 검색어로 필터링
       if (searchTerm && 
           !report.title?.toLowerCase().includes(searchTerm.toLowerCase()) && 
@@ -269,13 +280,6 @@ const Reports: React.FC = () => {
       if (path.includes('/reports/recommend')) {
         // 필독 목록 (우선순위가 'urgent' 또는 'high')
         return report.priority === 'urgent' || report.priority === 'high';
-      } else if (path.includes('/reports/recent')) {
-        // 최신 목록 (최근 7일 이내)
-        const reportDate = new Date(report.createdAt);
-        const now = new Date();
-        const diff = now.getTime() - reportDate.getTime();
-        const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-        return diffDays < 7;
       } else if (path.includes('/reports/me')) {
         // 내 보고서 목록
         return report.authorId === user?.id;
@@ -283,6 +287,17 @@ const Reports: React.FC = () => {
       
       return true; // 기본 경로면 모든 보고서 표시
     });
+    
+    // 최신 탭일 경우 최신 날짜순(내림차순)으로 정렬
+    if (location.pathname.includes('/reports/recent')) {
+      return [...filteredReports].sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // 내림차순 (최신순)
+      });
+    }
+    
+    return filteredReports;
   };
   
   const filteredReports = getFilteredReports();
@@ -343,7 +358,7 @@ const Reports: React.FC = () => {
           <ModalContent onClick={e => e.stopPropagation()}>
             <ReportForm
               onSubmit={handleSubmit}
-              isLoading={createReportMutation.isPending}
+              isLoading={false}
               onSuccess={() => setIsFormOpen(false)}
             />
           </ModalContent>

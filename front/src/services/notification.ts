@@ -6,7 +6,8 @@ class NotificationService {
   private reconnectTimeout: number | null = null;
 
   constructor() {
-    this.initializeWebSocket();
+    // 임시로 웹소켓 초기화 비활성화
+    // this.initializeWebSocket();
     this.requestNotificationPermission();
   }
 

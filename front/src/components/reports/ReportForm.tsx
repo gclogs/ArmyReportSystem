@@ -7,75 +7,92 @@ import CameraModal from './CameraModal';
 import { Button } from '../common/Button';
 import { toast } from 'react-toastify';
 
+const PageContainer = styled.div`
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+`;
+
 const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
+  gap: 24px;
+  padding: 28px;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 `;
 
 const Label = styled.label`
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
   text-align: left;
+  font-size: 15px;
 `;
 
 const Input = styled.input`
-  padding: 12px;
+  padding: 14px;
   border: 1px solid #e1e1e1;
   border-radius: 8px;
   font-size: 16px;
   background: white;
   color: #333;
+  transition: all 0.2s ease;
 
   &:focus {
     outline: none;
     border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
   }
 `;
 
 const TextArea = styled.textarea`
-  padding: 12px;
+  padding: 14px;
   border: 1px solid #e1e1e1;
   border-radius: 8px;
   font-size: 16px;
-  min-height: 120px;
+  min-height: 160px;
   resize: vertical;
   background: white;
   color: #333;
+  transition: all 0.2s ease;
+  line-height: 1.5;
 
   &:focus {
     outline: none;
     border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
   }
 `;
 
 const Select = styled.select`
-  padding: 12px;
+  padding: 14px;
   border: 1px solid #e1e1e1;
   border-radius: 8px;
   font-size: 16px;
   background: white;
   color: #333;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  appearance: menulist;
 
   &:focus {
     outline: none;
     border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
   }
 `;
 
 const ErrorMessage = styled.span`
   color: #ff3b30;
   font-size: 14px;
+  margin-top: -4px;
 `;
 
 const FileInput = styled.input`
@@ -84,6 +101,20 @@ const FileInput = styled.input`
 
 const FileButton = styled(Button)`
   width: fit-content;
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  &:hover {
+    background-color: #e0e0e0;
+  }
+  &:active {
+    background-color: #d0d0d0;
+  }
 `;
 
 const FileList = styled.ul`
@@ -96,24 +127,27 @@ const FileItem = styled.li`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  margin-bottom: 4px;
+  padding: 10px 14px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-size: 14px;
 `;
 
 const ImagePreview = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
-  margin-top: 8px;
+  margin-top: 12px;
 `;
 
 const PreviewCard = styled.div`
   position: relative;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   aspect-ratio: 1;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const PreviewImage = styled.img`
@@ -126,10 +160,10 @@ const RemoveButton = styled.button`
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   background: rgba(255, 59, 48, 0.8);
   color: white;
   font-size: 16px;
@@ -138,9 +172,16 @@ const RemoveButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
   &:hover {
     background: rgba(255, 59, 48, 1);
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -177,17 +218,17 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
   const handleFormSubmit = async (data: ReportFormData) => {
     try {
       setIsSubmitting(true);
-      
+
       // FormData 생성
       const formData = new FormData();
-      
+
       // 기본 데이터 추가
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined) {
           formData.append(key, value as string);
         }
       });
-      
+
       // 파일 첨부
       files.forEach((file, index) => {
         formData.append(`attachment${index}`, file);
@@ -196,11 +237,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
       // 카메라로 찍은 이미지 추가
       images.forEach((image, index) => {
         formData.append(`image${index}`, image.blob, `image${index}.jpg`);
-      }); 
+      });
 
       // 원본 데이터와 FormData 모두 전달
       onSubmit(formData);
-      
+
       // 성공 콜백 호출
       if (onSuccess) {
         onSuccess();
@@ -215,7 +256,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
   const isLoading = externalLoading || isSubmitting;
 
   return (
-    <>
+    <PageContainer>
       <FormContainer onSubmit={handleSubmit(handleFormSubmit)}>
         <FormGroup>
           <Label>보고 유형</Label>
@@ -300,8 +341,24 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
           </ImagePreview>
         </FormGroup>
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? '제출 중...' : '보고서 제출'}
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          style={{
+            padding: '14px',
+            fontSize: '16px',
+            fontWeight: 600,
+            borderRadius: '8px',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 6px rgba(0, 122, 255, 0.2)',
+          }}
+        >
+          {isLoading ? (
+            <>
+              <span className="spinner" style={{ marginRight: '8px' }}></span>
+              제출 중...
+            </>
+          ) : '보고서 제출'}
         </Button>
       </FormContainer>
 
@@ -310,7 +367,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ onSubmit, isLoading: externalLo
         onClose={() => setIsCameraOpen(false)}
         onCapture={handleCameraCapture}
       />
-    </>
+    </PageContainer>
   );
 };
 

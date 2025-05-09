@@ -21,14 +21,13 @@ const Wrapper = styled.nav`
     background: ${colors.background};
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
-    margin-bottom: 16px;
     align-items: center;
 `
 
-const TabLink = styled.button<{ isActive: boolean }>`
+const TabLink = styled.button<{ $isActive: boolean }>`
     position: relative;
-    color: ${props => props.isActive ? colors.primary : colors.textLight};
-    font-weight: ${props => props.isActive ? '600' : '400'};
+    color: ${props => props.$isActive ? colors.primary : colors.textLight};
+    font-weight: ${props => props.$isActive ? '600' : '400'};
     background: transparent;
     border: none;
     padding: 12px 20px;
@@ -50,14 +49,14 @@ const TabLink = styled.button<{ isActive: boolean }>`
         position: absolute;
         bottom: 0;
         left: 0;
-        width: ${props => props.isActive ? '100%' : '0'};
+        width: ${props => props.$isActive ? '100%' : '0'};
         height: 3px;
         background-color: ${colors.accent};
         transition: width 0.3s ease;
         border-radius: 3px 3px 0 0;
     }
     
-    ${props => props.isActive && `
+    ${props => props.$isActive && `
         &::before {
             content: '';
             position: absolute;
@@ -96,25 +95,24 @@ const HomeTab: React.FC = () => {
         navigate(path);
     }
     
+    const tabs = [
+        { path: '/reports/recommended', label: '필독' },
+        { path: '/reports/recent', label: '최신' },
+        { path: '/reports/me', label: '내 보고서' },
+    ];
+
     return (
         <Wrapper>
-            <TabLink 
-                isActive={location.pathname === '/reports/recommended'}
-                onClick={() => handleTabClick('/reports/recommended')}>
-                    필독
-            </TabLink>
-            <TabLink 
-                isActive={location.pathname === '/reports/recent'}
-                onClick={() => handleTabClick('/reports/recent')}>
-                    최신
-            </TabLink>
-            <TabLink 
-                isActive={location.pathname === '/reports/me'}
-                onClick={() => handleTabClick('/reports/me')}>
-                    내 보고서
-            </TabLink>
+            {tabs.map((tab) => (
+                <TabLink
+                    key={tab.path}
+                    $isActive={location.pathname === tab.path}
+                    onClick={() => handleTabClick(tab.path)}>
+                    {tab.label}
+                </TabLink>
+            ))}
         </Wrapper>
-    )
+    );
 }
 
 export default HomeTab;

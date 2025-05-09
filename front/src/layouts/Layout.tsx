@@ -10,7 +10,6 @@ const LayoutContainer = styled.div`
 `;
 
 const Main = styled.main`
-  padding: 64px 0 56px;
   min-height: calc(100vh - 120px);
 
   @media (max-width: 600px) {
