@@ -19,7 +19,14 @@
         <result property="deletedAt" column="deleted_at" />
     </resultMap>
     
-    <!-- 보안 강화: SQL Injection 방지를 위한 파라미터 바인딩 사용 -->
+    <select id="findAllReports" resultMap="ReportResultMap">
+        SELECT 
+            r.*
+        FROM 
+            reports r
+        WHERE 
+            r.is_deleted = FALSE
+    </select>
     
     <!-- 사용자 ID로 보고서 찾기 -->
     <select id="findReportByUserId" parameterType="String" resultMap="ReportResultMap">
