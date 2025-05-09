@@ -7,6 +7,7 @@ import com.gclogs.armyreportsystem.dto.ReportResponse;
 import com.gclogs.armyreportsystem.mapper.ReportMapper;
 import com.gclogs.armyreportsystem.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +40,7 @@ public class ReportService {
             reportResponses.add(ReportResponse.builder()
                     .success(true)
                     .message("보고서 조회 성공")
-                    .reportId(report.getReportId().toString())
+                    .reportId(report.getReportId())
                     .type(report.getType())
                     .title(report.getTitle())
                     .content(report.getContent())
@@ -88,7 +89,7 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서가 성공적으로 작성되었습니다.")
-                .reportId(report.getReportId().toString())
+                .reportId(report.getReportId())
                 .type(report.getType())
                 .title(report.getTitle())
                 .content(report.getContent())
@@ -134,7 +135,7 @@ public class ReportService {
     }
     
     @Transactional(readOnly = true)
-    public ReportResponse getReportById(String reportId) {
+    public ReportResponse getReportById(Long reportId) {
         Report report = reportMapper.findReportById(reportId);
         
         if (report == null) {
@@ -155,7 +156,7 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서 조회 성공")
-                .reportId(report.getReportId().toString())
+                .reportId(report.getReportId())
                 .type(report.getType())
                 .title(report.getTitle())
                 .content(report.getContent())
@@ -171,7 +172,7 @@ public class ReportService {
     }
 
     @Transactional
-    public ReportResponse editReport(String reportId, ReportRequest request) {
+    public ReportResponse editReport(Long reportId, ReportRequest request) {
         // 기존 보고서 조회
         Report existingReport = reportMapper.findReportById(reportId);
         
@@ -204,7 +205,7 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서가 성공적으로 수정되었습니다.")
-                .reportId(existingReport.getReportId().toString())
+                .reportId(existingReport.getReportId())
                 .type(existingReport.getType())
                 .title(existingReport.getTitle())
                 .content(existingReport.getContent())
@@ -220,7 +221,7 @@ public class ReportService {
     }
 
     @Transactional
-    public ReportResponse deleteReportById(String reportId) {
+    public ReportResponse deleteReportById(Long reportId) {
         Report report = reportMapper.findReportById(reportId);
         if (report == null) {
             return ReportResponse.builder()
@@ -247,7 +248,7 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서를 성공적으로 삭제하였습니다.")
-                .reportId(report.getReportId().toString())
+                .reportId(report.getReportId())
                 .type(report.getType())
                 .title(report.getTitle())
                 .content(report.getContent())

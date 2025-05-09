@@ -17,7 +17,7 @@ public class ReportResponse {
     private boolean success;               // 요청 성공 여부
     private String message;                // 응답 메시지
     
-    private String reportId;                     // 보고서 고유 ID
+    private Long reportId;                     // 보고서 고유 ID
     
     // 보고서 기본 정보
     private String type;                   // 보고서 유형 (normal, emergency, maintenance, incident)

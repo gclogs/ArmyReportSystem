@@ -1,7 +1,9 @@
 package com.gclogs.armyreportsystem.controller;
 
+import com.gclogs.armyreportsystem.dto.CommentResponse;
 import com.gclogs.armyreportsystem.dto.ReportRequest;
 import com.gclogs.armyreportsystem.dto.ReportResponse;
+import com.gclogs.armyreportsystem.service.CommentService;
 import com.gclogs.armyreportsystem.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.List;
 public class ReportController {
 
     private final ReportService reportService;
+    private final CommentService commentService;
 
     @GetMapping("/list")
     public ResponseEntity<List<ReportResponse>> getReportList() {
@@ -64,7 +67,7 @@ public class ReportController {
     }
     
     @GetMapping("/{reportId}")
-    public ResponseEntity<ReportResponse> getReportById(@PathVariable String reportId) {
+    public ResponseEntity<ReportResponse> getReportById(@PathVariable Long reportId) {
         ReportResponse response = reportService.getReportById(reportId);
         if (!response.isSuccess()) {
             return ResponseEntity.notFound().build();
@@ -74,7 +77,7 @@ public class ReportController {
     
     @PutMapping("/{reportId}")
     public ResponseEntity<ReportResponse> updateReport(
-            @PathVariable String reportId,
+            @PathVariable Long reportId,
             @Valid @RequestBody ReportRequest request) {
         ReportResponse response = reportService.editReport(reportId, request);
         if (!response.isSuccess()) {
@@ -84,7 +87,7 @@ public class ReportController {
     }
     
     @DeleteMapping("/{reportId}")
-    public ResponseEntity<ReportResponse> deleteReport(@PathVariable String reportId) {
+    public ResponseEntity<ReportResponse> deleteReport(@PathVariable Long reportId) {
         ReportResponse response = reportService.deleteReportById(reportId);
         if (!response.isSuccess()) {
             return ResponseEntity.badRequest().body(response);
