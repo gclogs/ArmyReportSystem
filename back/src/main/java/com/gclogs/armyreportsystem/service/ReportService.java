@@ -24,6 +24,40 @@ public class ReportService {
     private FileStrorageService fileStrorageService;
 
     @Transactional
+    public List<ReportResponse> getReports() {
+        List<Report> reports = reportMapper.findAllReports();
+        
+        if (reports == null || reports.isEmpty()) {
+            return List.of(ReportResponse.builder()
+                    .success(false)
+                    .message("보고서를 찾을 수 없습니다.")
+                    .build());
+        }
+
+        List<ReportResponse> reportResponses = new ArrayList<>();
+        for (Report report : reports) {
+            reportResponses.add(ReportResponse.builder()
+                    .success(true)
+                    .message("보고서 조회 성공")
+                    .reportId(report.getReportId().toString())
+                    .type(report.getType())
+                    .title(report.getTitle())
+                    .content(report.getContent())
+                    .priority(report.getPriority())
+                    .status(report.getStatus())
+                    .createdAt(report.getCreatedAt())
+                    .updatedAt(report.getUpdatedAt())
+                    .authorId(report.getAuthorId())
+                    .authorName(report.getAuthorName())
+                    .fileAttachments(new ArrayList<>())
+                    .comments(new ArrayList<>())
+                    .build());
+        }
+
+        return reportResponses;
+    }
+
+    @Transactional
     public ReportResponse writeReport(ReportRequest request, String userId) {
         // 1. 작성자 정보 조회
         User user = userMapper.findByUserId(userId);
