@@ -26,6 +26,8 @@
             reports r
         WHERE 
             r.is_deleted = FALSE
+        ORDER BY 
+            r.created_at DESC
     </select>
     
     <!-- 사용자 ID로 보고서 찾기 -->
@@ -50,6 +52,18 @@
             reports r
         WHERE 
             r.report_id = #{reportId}
+    </select>
+    
+    <!-- 모든 보고서 목록 조회 -->
+    <select id="getAllReports" resultMap="ReportResultMap">
+        SELECT
+            r.*
+        FROM
+            reports r
+        WHERE
+            r.is_deleted = FALSE
+        ORDER BY
+            r.created_at DESC
     </select>
     
     <!-- 보고서 작성 -->
