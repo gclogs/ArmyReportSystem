@@ -88,9 +88,10 @@ const SearchInput = styled.div`
   padding: 8px 12px;
   flex: 1;
   max-width: 300px;
-  margin-right: 16px;
   
   input {
+    margin-right: 16px;
+    color: ${colors.text};
     border: none;
     background: transparent;
     outline: none;
@@ -103,6 +104,53 @@ const SearchInput = styled.div`
 const ButtonsContainer = styled.div`
   display: flex;
   gap: 8px;
+`;
+
+// 댓글 섹션 스타일 컴포넌트
+const CommentsSection = styled.div`
+  margin-top: 24px;
+  border-top: 1px solid ${colors.border};
+  padding-top: 16px;
+`;
+
+const CommentItem = styled.div`
+  background-color: ${colors.background};
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+`;
+
+const CommentHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+`;
+
+const CommentAuthor = styled.span`
+  font-weight: 500;
+  color: ${colors.primary};
+  font-size: 14px;
+`;
+
+const CommentDate = styled.span`
+  font-size: 12px;
+  color: ${colors.textLight};
+`;
+
+const CommentContent = styled.p`
+  margin: 0;
+  color: ${colors.text};
+  font-size: 14px;
+  line-height: 1.5;
+`;
+
+const NoComments = styled.div`
+  text-align: center;
+  padding: 16px;
+  color: ${colors.textLight};
+  font-style: italic;
 `;
 
 const IconButton = styled.button`
@@ -193,6 +241,19 @@ const Reports: React.FC = () => {
         return response.data;
       } catch (error) {
         console.error('보고서 가져오기 실패:', error);
+        return [];
+      }
+    }
+  });
+
+  const { data: comments } = useQuery<Comment[]>({
+    queryKey: ['comments', selectedReport?.id],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get(`/reports/${selectedReport?.id}/comments`);
+        return response.data;
+      } catch (error) {
+        console.error('댓글 가져오기 실패:', error);
         return [];
       }
     }
@@ -302,6 +363,20 @@ const Reports: React.FC = () => {
   
   const filteredReports = getFilteredReports();
 
+  const getFilteredComments = () => {
+    if (!selectedReport || !selectedReport.comments) return [];
+    
+    return selectedReport.comments.filter(comment => {
+      if (searchTerm && 
+          !comment.content?.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  };
+
+  const filteredComments = getFilteredComments();
+  
   return (
     <Container>
       <Header>
@@ -373,6 +448,20 @@ const Reports: React.FC = () => {
               isOfficer={user?.role === 'OFFICER'}
               onStatusChange={(status: ReportStatus) => handleStatusChange(selectedReport.id, status)}
             />
+            <CommentsSection>
+              {filteredComments.map((comment, index) => (
+                <CommentItem key={index}>
+                  <CommentHeader>
+                    <CommentAuthor>{comment.authorName || 'Anonymous'}</CommentAuthor>
+                    <CommentDate>{new Date(comment.createdAt).toLocaleString()}</CommentDate>
+                  </CommentHeader>
+                  <CommentContent>{comment.content}</CommentContent>
+                </CommentItem>
+              ))}
+              {filteredComments.length === 0 && (
+                <NoComments>댓글이 없습니다</NoComments>
+              )}
+            </CommentsSection>
           </ModalContent>
         </Modal>
       )}

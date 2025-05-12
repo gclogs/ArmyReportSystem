@@ -177,6 +177,8 @@ const CommentInput = styled.input`
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.2s ease;
+  background-color: #fff;
+  color: #333;
 
   &:focus {
     outline: none;
