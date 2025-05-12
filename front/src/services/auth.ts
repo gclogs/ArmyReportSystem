@@ -1,4 +1,4 @@
-import { User } from '../schemas/user';
+import { User } from '../schemas/auth';
 import api from './apiClient';
 
 const TOKEN_KEY = 'auth_token';

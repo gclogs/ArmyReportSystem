@@ -5,6 +5,22 @@ import { z } from 'zod';
 import { RankSchema } from '../schemas/auth';
 import AuthService from '../services/auth';
 
+// 군대 테마에 맞는 색상 정의
+const colors = {
+    primary: '#2E4057', // 군복 느낌의 짙은 청록색
+    secondary: '#4F6D7A', // 짙은 청록색의 밝은 버전
+    accent: '#5C946E', // 군대 녹색
+    highlight: '#F6BD60', // 군대 배지 색상 (금빛)
+    background: '#F5F5F5', // 배경색
+    text: '#333333', // 텍스트 색상
+    textLight: '#6E6E6E', // 밝은 텍스트 색상
+    border: '#E0E0E0', // 테두리 색상
+    error: '#D32F2F', // 에러 메시지 색상
+    success: '#388E3C', // 성공 메시지 색상
+    white: '#FFFFFF', // 흰색
+    shadow: 'rgba(0, 0, 0, 0.08)' // 그림자 색상
+};
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -12,16 +28,31 @@ const Container = styled.div`
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
-  background: #f8f9fa;
+  background: ${colors.background};
 `;
+
 
 const RegisterBox = styled.div`
   width: 100%;
-  max-width: 500px;
-  padding: 32px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 720px;
+  padding: 40px;
+  background: ${colors.white};
+  border-radius: 16px;
+  box-shadow: 0 16px 32px ${colors.shadow};
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid ${colors.border};
+  position: relative;
+  overflow: hidden;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, ${colors.primary}, ${colors.secondary});
+  }
 `;
 
 const Title = styled.h1`
@@ -54,39 +85,49 @@ const FormRow = styled.div`
 
 const Label = styled.label`
   font-weight: 500;
-  color: #333;
+  color: ${colors.text};
 `;
 
 const Input = styled.input`
   padding: 12px;
-  border: 1px solid #e1e1e1;
+  border: 2px solid ${colors.border};
   border-radius: 8px;
   font-size: 16px;
+  background-color: ${colors.white};
+  color: ${colors.text};
+  transition: all 0.3s;
+  position: relative;
+  z-index: 1;
 
   &:focus {
     outline: none;
-    border-color: #007AFF;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 4px rgba(48, 76, 137, 0.1);
+  }
+  
+  &::placeholder {
+    color: #B0BEC5;
   }
 `;
 
 const Select = styled.select`
   padding: 12px;
-  border: 1px solid #e1e1e1;
+  border: 1px solid ${colors.border};
   border-radius: 8px;
   font-size: 16px;
-  background-color: white;
-  color: #333;
+  background-color: ${colors.white};
+  color: ${colors.text};
 
   &:focus {
     outline: none;
-    border-color: #007AFF;
+    border-color: ${colors.primary};
   }
 `;
 
 const Button = styled.button`
   padding: 12px;
-  background: #007AFF;
-  color: white;
+  background: ${colors.primary};
+  color: ${colors.white};
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -95,17 +136,17 @@ const Button = styled.button`
   transition: background-color 0.2s;
 
   &:hover {
-    background: #0056b3;
+    background: ${colors.secondary};
   }
 
   &:disabled {
-    background: #cccccc;
+    background: ${colors.border};
     cursor: not-allowed;
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: #ff3b30;
+  color: ${colors.error};
   font-size: 14px;
   text-align: center;
   margin-top: 16px;
@@ -114,7 +155,7 @@ const ErrorMessage = styled.div`
 const LoginLink = styled.button`
   background: none;
   border: none;
-  color: #007AFF;
+  color: ${colors.primary};
   font-size: 14px;
   cursor: pointer;
   margin-top: 16px;
@@ -128,7 +169,7 @@ const LoginLink = styled.button`
 
 const HelperText = styled.p`
   font-size: 12px;
-  color: #666;
+  color: ${colors.textLight};
   margin: 4px 0 0;
 `;
 
@@ -222,7 +263,7 @@ const Register: React.FC = () => {
         <Form onSubmit={handleSubmit}>
           <FormGroup>
             <Label htmlFor="userId">군번</Label>
-            <Input
+            <Input 
               id="userId"
               name="userId"
               type="text"
@@ -266,6 +307,7 @@ const Register: React.FC = () => {
                 id="name"
                 name="name"
                 type="text"
+                placeholder='홍길동'
                 required
               />
               {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import axios from 'axios';
 
 export const RoleSchema = z.enum(['SOLDIER', 'OFFICER', 'ADMIN']);
 export const RankSchema = z.enum([
