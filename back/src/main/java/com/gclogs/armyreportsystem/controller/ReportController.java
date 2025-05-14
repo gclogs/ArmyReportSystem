@@ -36,7 +36,7 @@ public class ReportController {
      * FormData 형식의 보고서 생성 엔드포인트 (파일 첨부 가능)
      * Content-Type: multipart/form-data
      */
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value="/multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ReportResponse> createReportMultipart(
         @RequestParam("title") String title,
         @RequestParam("content") String content,
