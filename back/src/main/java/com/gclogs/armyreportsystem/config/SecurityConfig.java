@@ -14,12 +14,19 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.gclogs.armyreportsystem.security.jwt.JwtTokenProvider;
+
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,16 +36,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/api/auth/**"),
-                                new AntPathRequestMatcher("/api/reports/**"),
-                                new AntPathRequestMatcher("/api/user/**"),    // User 관련 요청 경로 허용
-                                new AntPathRequestMatcher("/error"),
-                                new AntPathRequestMatcher("/favicon.ico"),
-                                new AntPathRequestMatcher("/ws/**")
-                        ).permitAll()
-                        .anyRequest().permitAll() // 임시로 모든 요청 허용
-                );
+                    .requestMatchers("/api/auth/**").permitAll() // 로그인, 회원가입 API는 토큰 없이 접근 허용
+                    .requestMatchers("/api/public/**").permitAll() // 공개 API는 토큰 없이 접근 허용
+                    .anyRequest().authenticated())
+                .addFilter(new JwtAuthenticationFilter(jwtTokenProvider));
                 
         // 로그에 보안 설정 출력
         System.out.println("SecurityConfig: 보안 설정 적용 완료");
