@@ -32,13 +32,11 @@ function AuthRedirect({ children }: { children: React.ReactNode }) {
 }
 
 function AuthCheck({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuthStore();
-
-  if (isLoading) return <div>Loading...</div>;
-  if (!isAuthenticated) {
+  const user = useAuthStore();
+  if(!user) {
     return <Navigate to="/login" replace />;
   }
-  return <>{children}</>;
+  return <>{children}</>
 }
 
 function App() {
