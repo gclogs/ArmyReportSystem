@@ -1,65 +1,121 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Report, ReportFilter, ReportFormData } from '../types/report';
+// src/hooks/useReports.ts
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getApiClient } from '../lib/client';
+import { Report, ReportStatus } from '../schemas/report';
+import { useLocation } from 'react-router-dom';
+import useAuthStore from '../stores/authStore';
 
-const API_BASE_URL = '/api';
-
-async function fetchReports(filter?: ReportFilter): Promise<Report[]> {
-  const queryParams = filter ? `?${new URLSearchParams(filter as any)}` : '';
-  const response = await fetch(`${API_BASE_URL}/reports${queryParams}`);
-  if (!response.ok) throw new Error('Failed to fetch reports');
-  return response.json();
-}
-
-async function createReport(data: ReportFormData): Promise<Report> {
-  const response = await fetch(`${API_BASE_URL}/reports`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create report');
-  return response.json();
-}
-
-async function updateReport(id: string, data: Partial<ReportFormData>): Promise<Report> {
-  const response = await fetch(`${API_BASE_URL}/reports/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to update report');
-  return response.json();
-}
-
-export function useReports(filter?: ReportFilter) {
-  return useQuery({
-    queryKey: ['reports', filter],
-    queryFn: () => fetchReports(filter),
-  });
-}
-
-export function useCreateReport() {
+export const useReports = (selectedReportId?: string) => {
+  const { user } = useAuthStore();
+  const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: createReport,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
-    },
-  });
-}
 
-export function useUpdateReport() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<ReportFormData> }) =>
-      updateReport(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
-    },
+  // 모든 보고서 가져오기
+  const { data: reports, isLoading } = useQuery<Report[]>({
+    queryKey: ['reports'],
+    queryFn: async () => {
+      const response = await getApiClient().get('/repoerts/list');
+      return response.data;
+    }
   });
-}
+
+  // 선택된 보고서의 댓글 가져오기
+  const { data: comments } = useQuery<Comment[]>({
+    queryKey: ['comments', selectedReport?.id],
+    queryFn: async () => {
+      try {
+        const response = await getApiClient().get(`/repoerts/${selectedReport?.id}/comments`);
+        return response.data;
+      } catch (error) {
+        console.error('댓글 가져오기 실패:', error);
+        return [];
+      }
+    },
+    enabled: !!selectedReport?.id
+  });
+
+  // 보고서 작성 함수
+  const createReport = async (formData: FormData) => {
+    const response = await getApiClient().post('/repoerts', formData);
+    queryClient.invalidateQueries({ queryKey: ['reports'] });
+    return response;
+  };
+
+  // 보고서 상태 업데이트 함수
+  const updateReportStatus = async (id: string, status: ReportStatus) => {
+    const response = await getApiClient().put(`/reports/${id}/status`, { status });
+    queryClient.invalidateQueries({ queryKey: ['reports'] });
+    return response.data;
+  };
+
+  // URL에 따라 필터링된 보고서 목록
+  const getFilteredReports = () => {
+    if (!reports || reports.length === 0) return [];
+
+    // 검색어와 기본 필터링 적용
+    const filteredReports = reports.filter(report => {
+      const path = location.pathname;
+
+      // 검색어로 필터링
+      if (searchTerm && 
+          !report.title?.toLowerCase().includes(searchTerm.toLowerCase()) && 
+          !report.content?.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      
+      if (path.includes('/reports/recommend')) {
+        // 필독 목록 (우선순위가 'urgent' 또는 'high')
+        return report.priority === 'urgent' || report.priority === 'high';
+      } else if (path.includes('/reports/me')) {
+        // 내 보고서 목록
+        return report.authorId === user?.id;
+      }
+      
+      return true; // 기본 경로면 모든 보고서 표시
+    });
+    
+    // 최신 탭일 경우 최신 날짜순(내림차순)으로 정렬
+    if (location.pathname.includes('/reports/recent')) {
+      return [...filteredReports].sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // 내림차순 (최신순)
+      });
+    }
+    
+    return filteredReports;
+  };
+
+  // 필터링된 댓글 목록
+  const getFilteredComments = () => {
+    if (!selectedReport || !selectedReport.comments) return [];
+    
+    return selectedReport.comments.filter(comment => {
+      if (searchTerm && 
+          !comment.content?.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  };
+
+  const filteredReports = getFilteredReports();
+  const filteredComments = getFilteredComments();
+
+  return {
+    reports,
+    comments,
+    filteredReports,
+    filteredComments,
+    isLoading,
+    searchTerm,
+    setSearchTerm,
+    selectedReport,
+    setSelectedReport,
+    createReport,
+    updateReportStatus
+  };
+};
