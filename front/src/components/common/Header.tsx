@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import NotificationBell from './NotificationBell';
-import { useNotifications } from '../../hooks/useNotifications';
-import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaBars } from "react-icons/fa6";
 import { FaSearch } from 'react-icons/fa';
+import useAuthStore from '../../stores/authStore';
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -118,8 +117,7 @@ const DropdownItem = styled.button`
 
 
 const Header: React.FC = () => {
-  const { notifications, handleNotificationClick, markAsRead } = useNotifications();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -161,11 +159,6 @@ const Header: React.FC = () => {
           <IconButton aria-label="검색">
             <FaSearch />
           </IconButton>
-          <NotificationBell
-            notifications={notifications}
-            onNotificationClick={handleNotificationClick}
-            onMarkAsRead={markAsRead}
-          />
           <MenuContainer ref={menuRef}>
             <MenuIcon onClick={toggleMenu} aria-label="메뉴">
               <FaBars />
