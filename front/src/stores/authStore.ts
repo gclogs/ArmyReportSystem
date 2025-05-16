@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 import { Permission, DEFAULT_PERMISSIONS } from "../schemas/auth";
-import AuthService from "../services/auth";
+import { getMyAccount, login, logout } from "../lib/api/auth";
 
 interface User {
     id: string;
@@ -43,22 +43,15 @@ const useAuthStore = create<AuthState>()(
             },
             
             login: async (userId: string, password: string) => {
-                const authService = AuthService.getInstance();
                 set({ isLoading: true });
                 
-                try {
-                    await authService.login(userId, password);
-                    const user = authService.getUser();
-                    set({ user, isAuthenticated: true, isLoading: false });
-                } catch (error) {
-                    set({ isLoading: false });
-                    throw error;
-                }
+                const tokens = await login(userId, password);
+                const user = await getMyAccount(tokens.accessToken);
+                set({ user, isAuthenticated: true, isLoading: false });
             },
             
-            logout: () => {
-                const authService = AuthService.getInstance();
-                authService.logout();
+            logout: async () => {
+                await logout();
                 set({ user: null, isAuthenticated: false });
             },
             
@@ -74,7 +67,10 @@ const useAuthStore = create<AuthState>()(
         }),
         {
             name: 'auth',
-            storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({
+                user: state.user,
+                isAuthenticated: state.isAuthenticated
+            }),
         }
     )
 );

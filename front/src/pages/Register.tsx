@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { z } from 'zod';
 import { RankSchema } from '../schemas/auth';
-import AuthService from '../services/auth';
+import { register } from '../lib/api/auth';
 
 // 군대 테마에 맞는 색상 정의
 const colors = {
@@ -231,8 +231,7 @@ const Register: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const auth = AuthService.getInstance();
-      await auth.register(
+      await register(
         formValues.userId,
         formValues.password,
         formValues.name,

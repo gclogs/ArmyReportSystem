@@ -1,13 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DashboardStats from '../components/dashboards/DashboardStats';
 import DashboardCharts from '../components/dashboards/DashboardCharts';
 import { ReportList } from '../components/reports/ReportList';
 import type { ReportStatistics, UnitStatistics } from '../schemas/dashboard';
 import { Report } from '../schemas/report';
+import useAuthStore from '../stores/authStore';
 
 const DashboardContainer = styled.div`
   padding: 24px;
@@ -41,7 +41,7 @@ const SectionTitle = styled.h2`
 `;
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
   const { data: reportStats, isLoading: isLoadingReportStats } = useQuery<ReportStatistics>({

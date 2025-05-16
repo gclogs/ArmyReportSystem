@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-import { useAuth } from '../contexts/AuthContext';
+import { login } from '../lib/api/auth';
 import { FaUser, FaLock, FaStar, FaSignInAlt } from 'react-icons/fa';
 
 // 군대 테마에 맞는 색상 정의
@@ -287,7 +287,6 @@ const RegisterLink = styled.button`
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -314,7 +313,7 @@ const Login: React.FC = () => {
     const password = formData.get('password') as string;
 
     try {
-      await auth.login(userId, password);
+      await login(userId, password);
       navigate(from, { replace: true });
     } catch (error) {
       setError('로그인에 실패했습니다. 군번과 비밀번호를 확인해주세요.');

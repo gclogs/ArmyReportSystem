@@ -6,11 +6,11 @@ import { ReportList } from '../components/reports/ReportList';
 import { ReportDetail } from '../components/reports/ReportDetail';
 import { Button } from '../components/common/Button';
 import type { ReportFormData, Report, ReportStatus } from '../schemas/report';
-import { useAuth } from '../contexts/AuthContext';
-import apiClient from '../services/apiClient';
 import HomeTab from '../components/home/HomeTab';
 import { useLocation } from 'react-router-dom';
 import { IoAddCircle, IoFilter, IoSearch, IoGrid, IoList } from 'react-icons/io5';
+import useAuthStore from '../stores/authStore';
+import { useReports } from '../hooks/useReports';
 
 // 군대 테마에 맞는 색상 정의
 const colors = {
@@ -219,163 +219,25 @@ const ModalContent = styled.div`
 `;
 
 const Reports: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const location = useLocation();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isGridView, setIsGridView] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const queryClient = useQueryClient();
+  const {
+    selectedReport,
+    setSelectedReport,
+    filteredReports, 
+    searchTerm, 
+    setSearchTerm, 
+    createReport, 
+    filteredComments, 
+    updateReportStatus 
+  } = useReports();
 
   // 경로 변경 시 검색어 초기화
   useEffect(() => {
     setSearchTerm('');
   }, [location.pathname]);
-
-  // 모든 보고서 가져오기
-  const { data: reports, isLoading, error } = useQuery<Report[]>({
-    queryKey: ['reports'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get('/reports/list');
-        return response.data;
-      } catch (error) {
-        console.error('보고서 가져오기 실패:', error);
-        return [];
-      }
-    }
-  });
-
-  const { data: comments } = useQuery<Comment[]>({
-    queryKey: ['comments', selectedReport?.id],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get(`/reports/${selectedReport?.id}/comments`);
-        return response.data;
-      } catch (error) {
-        console.error('댓글 가져오기 실패:', error);
-        return [];
-      }
-    }
-  });
-
-  // 보고서 작성 함수
-  const createReport = async (formData: FormData) => {
-
-    try {
-      // 사용자 인증 확인
-      if (!user) {
-        throw new Error('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
-      }
-
-      if (!user.id) {
-        console.error('사용자 ID가 없습니다:', user);
-        throw new Error('사용자 정보가 올바르지 않습니다. 다시 로그인해주세요.');
-      }
-
-      
-      const response = await apiClient.post('/reports', formData, {
-        headers: {
-          'userId': user.userId
-        }
-      });
-      
-      console.log('보고서 생성 응답:', response.data);
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
-      return response.data;
-    } catch (error) {
-      console.error('보고서 생성 중 오류:', error);
-      throw error;
-    }
-  };
-
-  // 보고서 상태 업데이트 함수
-  const updateReportStatus = async (id: string, status: ReportStatus) => {
-    try {
-      const response = await apiClient.put(`/reports/${id}/status`, { status });
-      // 성공 시 보고서 목록 리프레시
-      queryClient.invalidateQueries({ queryKey: ['reports']});
-      return response.data;
-    } catch (error) {
-      console.error('상태 업데이트 중 오류:', error);
-      throw error;
-    }
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      await createReport(formData);
-      // 성공 시 추가 로직이 필요하다면 여기에 추가
-    } catch (error) {
-      console.error('제출 중 오류:', error);
-    }
-  };
-
-  const handleStatusChange = async (reportId: string, newStatus: ReportStatus) => {
-    try {
-      await updateReportStatus(reportId, newStatus);
-    } catch (error) {
-      console.error('상태 변경 중 오류:', error);
-    }
-  };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  // URL에 따라 필터링된 보고서 목록
-  const getFilteredReports = () => {
-    if (!reports || reports.length === 0) return [];
-
-    // 검색어와 기본 필터링 적용
-    const filteredReports = reports.filter(report => {
-      const path = location.pathname;
-
-      // 검색어로 필터링
-      if (searchTerm && 
-          !report.title?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-          !report.content?.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
-      
-      if (path.includes('/reports/recommend')) {
-        // 필독 목록 (우선순위가 'urgent' 또는 'high')
-        return report.priority === 'urgent' || report.priority === 'high';
-      } else if (path.includes('/reports/me')) {
-        // 내 보고서 목록
-        return report.authorId === user?.id;
-      }
-      
-      return true; // 기본 경로면 모든 보고서 표시
-    });
-    
-    // 최신 탭일 경우 최신 날짜순(내림차순)으로 정렬
-    if (location.pathname.includes('/reports/recent')) {
-      return [...filteredReports].sort((a, b) => {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        return dateB - dateA; // 내림차순 (최신순)
-      });
-    }
-    
-    return filteredReports;
-  };
-  
-  const filteredReports = getFilteredReports();
-
-  const getFilteredComments = () => {
-    if (!selectedReport || !selectedReport.comments) return [];
-    
-    return selectedReport.comments.filter(comment => {
-      if (searchTerm && 
-          !comment.content?.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
-      return true;
-    });
-  };
-
-  const filteredComments = getFilteredComments();
   
   return (
     <Container>
@@ -432,7 +294,7 @@ const Reports: React.FC = () => {
         <Modal onClick={() => setIsFormOpen(false)}>
           <ModalContent onClick={e => e.stopPropagation()}>
             <ReportForm
-              onSubmit={handleSubmit}
+              onSubmit={createReport}
               isLoading={false}
               onSuccess={() => setIsFormOpen(false)}
             />
@@ -446,7 +308,7 @@ const Reports: React.FC = () => {
             <ReportDetail
               report={selectedReport}
               isOfficer={user?.role === 'OFFICER'}
-              onStatusChange={(status: ReportStatus) => handleStatusChange(selectedReport.id, status)}
+              onStatusChange={(status: ReportStatus) => updateReportStatus(selectedReport.id, status)}
             />
             <CommentsSection>
               {filteredComments.map((comment, index) => (
