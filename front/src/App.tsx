@@ -7,10 +7,9 @@ import Reports from './pages/Reports';
 import Approvals from './pages/Approvals';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import GlobalStyle from './styles/GlobalStyle';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { RequireAuth } from './components/auth/RequireAuth';
+import GlobalStyle from './GlobalStyle';
 import './App.css'
+import useAuthStore from './stores/authStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,7 +22,7 @@ const queryClient = new QueryClient({
 });
 
 function AuthRedirect({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   if (isLoading) return <div>Loading...</div>;
   if (isAuthenticated) {
@@ -32,41 +31,49 @@ function AuthRedirect({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AuthCheck({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuthStore();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <GlobalStyle />
-          <Routes>
-            <Route path="/login" element={
-              <AuthRedirect>
-                <Login />
-              </AuthRedirect>
-              } />
-            <Route path="/register" element={
-              <AuthRedirect>
-                <Register />
-              </AuthRedirect>
+      <Router>
+        <GlobalStyle />
+        <Routes>
+          <Route path="/login" element={
+            <AuthRedirect>
+              <Login />
+            </AuthRedirect>
             } />
-            <Route path="/" element={
-              <RequireAuth>
-                <Layout />
-              </RequireAuth>
-            }>
-              <Route index element={<Dashboard />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="reports/:id" element={<Reports />} />
-              <Route path="reports/recommend" element={<Reports />} />
-              <Route path="reports/recent" element={<Reports />} />
-              <Route path="reports/me" element={<Reports />} />
-              <Route path="approvals" element={<Approvals />} />
-            </Route>
-            
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
+          <Route path="/register" element={
+            <AuthRedirect>
+              <Register />
+            </AuthRedirect>
+          } />
+          <Route path="/" element={
+            <AuthCheck>
+              <Layout />
+            </AuthCheck>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="reports/:id" element={<Reports />} />
+            <Route path="reports/recommend" element={<Reports />} />
+            <Route path="reports/recent" element={<Reports />} />
+            <Route path="reports/me" element={<Reports />} />
+            <Route path="approvals" element={<Approvals />} />
+          </Route>
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
