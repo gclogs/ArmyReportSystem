@@ -91,22 +91,11 @@ public class UserService {
                     .build();
         }
 
-        // JWT 토큰 생성 (간단한 예시)
-        String token = generateToken(user);
-
         return LoginResponse.builder()
                 .success(true)
                 .message("로그인에 성공하였습니다.")
-                .token(token)
                 .user(user)
                 .build();
-    }
-
-    // 간단한 토큰 생성 메서드 (실제 구현은 JWT 라이브러리 사용 권장)
-    private String generateToken(User user) {
-        // 실제 프로덕션에서는 JWT 라이브러리를 사용하여 구현해야 합니다.
-        // 이 예제에서는 간단히 사용자 ID와 현재 시간을 조합하여 토큰을 생성합니다.
-        return user.getUserId() + "_" + System.currentTimeMillis();
     }
 
     // 사용자 정보 조회 서비스
