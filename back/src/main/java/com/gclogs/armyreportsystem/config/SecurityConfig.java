@@ -1,8 +1,8 @@
 package com.gclogs.armyreportsystem.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,6 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.gclogs.armyreportsystem.security.jwt.JwtAuthenticationFilter;
 import com.gclogs.armyreportsystem.security.jwt.JwtTokenProvider;
 
 import java.util.Arrays;
@@ -24,7 +25,7 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+    public SecurityConfig(@Lazy JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -39,7 +40,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/**").permitAll() // 로그인, 회원가입 API는 토큰 없이 접근 허용
                     .requestMatchers("/api/public/**").permitAll() // 공개 API는 토큰 없이 접근 허용
                     .anyRequest().authenticated())
-                .addFilter(new JwtAuthenticationFilter(jwtTokenProvider));
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), JwtAuthenticationFilter.class);
                 
         // 로그에 보안 설정 출력
         System.out.println("SecurityConfig: 보안 설정 적용 완료");
