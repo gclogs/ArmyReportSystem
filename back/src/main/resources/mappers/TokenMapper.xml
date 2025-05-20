@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gclogs.armyreportsystem.security.jwt.TokenMapper">
+
+    <!-- 리프레시 토큰을 저장하거나 업데이트 -->
+    <insert id="saveRefreshToken">
+        MERGE INTO user_tokens
+        USING DUAL
+        ON (user_id = #{userId})
+        WHEN MATCHED THEN
+            UPDATE SET refresh_token = #{refreshToken}, updated_at = CURRENT_TIMESTAMP, is_active = true
+        WHEN NOT MATCHED THEN
+            INSERT (user_id, refresh_token, created_at, updated_at, is_active)
+            VALUES (#{userId}, #{refreshToken}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true)
+    </insert>
+
+    <!-- 사용자의 리프레시 토큰 삭제 -->
+    <delete id="deleteRefreshToken">
+        DELETE FROM user_tokens
+        WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 리프레시 토큰을 사용하여 사용자 ID 조회 -->
+    <select id="findUserIdByRefreshToken" resultType="string">
+        SELECT user_id
+        FROM user_tokens
+        WHERE refresh_token = #{refreshToken}
+        AND is_active = true
+    </select>
+
+</mapper>
