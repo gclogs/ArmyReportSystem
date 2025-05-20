@@ -9,6 +9,5 @@ import lombok.Getter;
 public class LoginResponse {
     private final boolean success;
     private final String message;
-    private final String token;
     private final User user;
 }
