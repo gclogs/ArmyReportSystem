@@ -1,29 +1,20 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Permission, DEFAULT_PERMISSIONS } from "../schemas/auth";
-import { getMyAccount, login, logout } from "../lib/api/auth";
-
-interface User {
-    id: string;
-    username: string;
-    role: string;
-    rank: string;
-    name: string;
-    unitId: string;
-    isApproved: boolean;
-    phoneNumber: string;
-    email: string;
-    createdAt: string;
-    lastLoginAt: string;
-}
+import { Permission } from "../schemas/auth";
+import { AuthResponse, login, logout } from "../lib/api/auth";
+import { setCookie, deleteCookie } from "../lib/cookies";
 
 interface AuthState {
-    user: User | null;
+    userId: string | null;
+    name: string | null;
+    unitName: string | null;
+    email: string | null;
+    rank: string | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    setUser: (user: User | null) => void;
-    setTokens: (refreshToken: string) => void;
-    login: (userId: string, password: string) => Promise<void>;
+    setAuthenticated: (userId: string, isAuthenticated: boolean) => void;
+    setAccessToken: (accessToken: string) => void;
+    login: (userId: string, password: string) => Promise<AuthResponse>;
     logout: () => void;
     hasPermission: (permission: Permission) => boolean;
 }
@@ -31,44 +22,77 @@ interface AuthState {
 const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
-            user: null,
+            userId: null,
+            name: null,
+            unitName: null,
+            email: null,
+            rank: null,
             isLoading: false,
             isAuthenticated: false,
             
-            setUser: (user: User | null) => {
-                set({ user, isAuthenticated: !!user });
+            setAuthenticated: (userId: string, isAuthenticated: boolean) => {
+                set({ userId, isAuthenticated });
             },
             
-            setTokens: (refreshToken: string) => {
+            setAccessToken: (accessToken: string) => {
+                // 쿠키 유틸리티를 사용하여 토큰 저장
+                setCookie('access_token', accessToken, 1); // 1일 유효
             },
             
             login: async (userId: string, password: string) => {
                 set({ isLoading: true });
                 
-                const tokens = await login(userId, password);
-                const user = await getMyAccount(tokens.accessToken);
-                set({ user, isAuthenticated: true, isLoading: false });
+                try {
+                    const response = await login(userId, password);
+                    
+                    // 토큰 쿠키에 저장
+                    const { access_token, user_id, name, unit_name, email, rank } = response;
+                    get().setAccessToken(access_token);
+                    
+                    // 사용자 인증 상태 설정
+                    set({ 
+                        userId: user_id, 
+                        name,
+                        unitName: unit_name,
+                        email,
+                        rank,
+                        isAuthenticated: true, 
+                        isLoading: false 
+                    });
+                    
+                    return response;
+                } catch (error) {
+                    set({ isLoading: false });
+                    throw error;
+                }
             },
             
             logout: async () => {
-                await logout();
-                set({ user: null, isAuthenticated: false });
+                try {
+                    await logout();
+                } catch (error) {
+                    console.error("로그아웃 실패:", error);
+                }
+                
+                deleteCookie('access_token');
+                set({ userId: null, name: null, unitName: null, email: null, rank: null, isAuthenticated: false });
             },
             
             hasPermission: (permission: Permission) => {
-                const { user } = get();
-                if (!user || !user.role) return false;
+                const { userId, isAuthenticated } = get();
+                if (!userId || !isAuthenticated) return false;
                 
-                const role = user.role as keyof typeof DEFAULT_PERMISSIONS;
-                const permissions = DEFAULT_PERMISSIONS[role];
-                
-                return Array.isArray(permissions) && permissions.includes(permission);
+                return true;
             }
         }),
         {
             name: 'auth',
             partialize: (state) => ({
-                user: state.user,
+                userId: state.userId,
+                name: state.name,
+                unitName: state.unitName,
+                email: state.email,
+                rank: state.rank,
                 isAuthenticated: state.isAuthenticated
             }),
         }

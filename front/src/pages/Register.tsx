@@ -175,17 +175,17 @@ const HelperText = styled.p`
 
 // Registration form validation schema
 const registerSchema = z.object({
-  userId: z.string().min(1, '군번은 필수 입력사항입니다.'),
+  user_id: z.string().min(1, '군번은 필수 입력사항입니다.'),
   password: z.string().min(8, '비밀번호는 최소 8자 이상이어야 합니다.'),
-  confirmPassword: z.string().min(1, '비밀번호 확인은 필수 입력사항입니다.'),
+  confirm_password: z.string().min(1, '비밀번호 확인은 필수 입력사항입니다.'),
   name: z.string().min(1, '이름은 필수 입력사항입니다.'),
   rank: z.string().min(1, '계급은 필수 입력사항입니다.'),
-  unitName: z.string().min(1, '소속 부대는 필수 입력사항입니다.'),
-  phoneNumber: z.string().optional(),
+  unit_name: z.string().min(1, '소속 부대는 필수 입력사항입니다.'),
+  phone_number: z.string().optional(),
   email: z.string().email('유효한 이메일 주소를 입력해주세요.').optional().or(z.literal('')),
-}).refine(data => data.password === data.confirmPassword, {
+}).refine(data => data.password === data.confirm_password, {
   message: '비밀번호가 일치하지 않습니다.',
-  path: ['confirmPassword'],
+  path: ['confirm_password'],
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -206,13 +206,13 @@ const Register: React.FC = () => {
     
     const formData = new FormData(event.currentTarget);
     const formValues = {
-      userId: formData.get('userId') as string,
+      user_id: formData.get('user_id') as string,
       password: formData.get('password') as string,
-      confirmPassword: formData.get('confirmPassword') as string,
+      confirm_password: formData.get('confirm_password') as string,
       name: formData.get('name') as string,
       rank: formData.get('rank') as string,
-      unitName: formData.get('unitName') as string,
-      phoneNumber: formData.get('phoneNumber') as string || undefined,
+      unit_name: formData.get('unit_name') as string,
+      phone_number: formData.get('phone_number') as string || undefined,
       email: formData.get('email') as string || undefined,
     };
     
@@ -232,16 +232,15 @@ const Register: React.FC = () => {
     
     try {
       await register(
-        formValues.userId,
+        formValues.user_id,
         formValues.password,
         formValues.name,
         formValues.rank,
-        formValues.unitName,
-        formValues.phoneNumber,
+        formValues.unit_name,
+        formValues.phone_number,
         formValues.email
       );
       
-      // Registration successful, redirect to login page with success message
       navigate('/login', { 
         state: { 
           message: '회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.' 
@@ -261,15 +260,15 @@ const Register: React.FC = () => {
         <Title>회원가입</Title>
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label htmlFor="userId">군번</Label>
+            <Label htmlFor="user_id">군번</Label>
             <Input 
-              id="userId"
-              name="userId"
+              id="user_id"
+              name="user_id"
               type="text"
               required
               placeholder="예: 22-12345678"
             />
-            {errors.userId && <ErrorMessage>{errors.userId}</ErrorMessage>}
+            {errors.user_id && <ErrorMessage>{errors.user_id}</ErrorMessage>}
           </FormGroup>
           
           <FormRow>
@@ -287,15 +286,15 @@ const Register: React.FC = () => {
             </FormGroup>
             
             <FormGroup>
-              <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+              <Label htmlFor="confirm_password">비밀번호 확인</Label>
               <Input
-                id="confirmPassword"
-                name="confirmPassword"
+                id="confirm_password"
+                name="confirm_password"
                 type="password"
                 required
                 autoComplete="new-password"
               />
-              {errors.confirmPassword && <ErrorMessage>{errors.confirmPassword}</ErrorMessage>}
+              {errors.confirm_password && <ErrorMessage>{errors.confirm_password}</ErrorMessage>}
             </FormGroup>
           </FormRow>
           
@@ -331,26 +330,26 @@ const Register: React.FC = () => {
           </FormRow>
           
           <FormGroup>
-            <Label htmlFor="unitName">소속 부대</Label>
+            <Label htmlFor="unit_name">소속 부대</Label>
             <Input
-              id="unitName"
-              name="unitName"
+              id="unit_name"
+              name="unit_name"
               type="text"
               required
               placeholder="예: 제00사단 00연대 00대대"
             />
-            {errors.unitName && <ErrorMessage>{errors.unitName}</ErrorMessage>}
+            {errors.unit_name && <ErrorMessage>{errors.unit_name}</ErrorMessage>}
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="phoneNumber">전화번호 (선택)</Label>
+            <Label htmlFor="phone_number">전화번호 (선택)</Label>
             <Input
-              id="phoneNumber"
-              name="phoneNumber"
+              id="phone_number"
+              name="phone_number"
               type="tel"
               placeholder="예: 010-1234-5678"
             />
-            {errors.phoneNumber && <ErrorMessage>{errors.phoneNumber}</ErrorMessage>}
+            {errors.phone_number && <ErrorMessage>{errors.phone_number}</ErrorMessage>}
           </FormGroup>
           
           <FormGroup>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-import { login } from '../lib/api/auth';
 import { FaUser, FaLock, FaStar, FaSignInAlt } from 'react-icons/fa';
+import useAuthStore from '../stores/authStore';
 
 // 군대 테마에 맞는 색상 정의
 const colors = {
@@ -290,9 +290,10 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const login = useAuthStore(state => state.login);
 
   // Redirect after login
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || '/reports';
 
   useEffect(() => {
     // Check if there's a message in the location state (e.g., from registration)
@@ -309,14 +310,18 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const userId = formData.get('userId') as string;
+    const userId = formData.get('user_id') as string;
     const password = formData.get('password') as string;
 
     try {
+      // 로그인 요청 수행 (이미 토큰 저장 및 인증 상태 설정이 내부에서 처리됨)
       await login(userId, password);
+      
+      // 로그인 성공 시 리다이렉트
       navigate(from, { replace: true });
-    } catch (error) {
-      setError('로그인에 실패했습니다. 군번과 비밀번호를 확인해주세요.');
+    } catch (error: any) {
+      console.error('로그인 오류:', error);
+      setError(error?.response?.data?.message || '로그인에 실패했습니다. 군번과 비밀번호를 확인해주세요.');
     } finally {
       setIsLoading(false);
     }
@@ -335,12 +340,12 @@ const Login: React.FC = () => {
         
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label htmlFor="userId">
+            <Label htmlFor="user_id">
               <FaUser /> 군번
             </Label>
             <Input
-              id="userId"
-              name="userId"
+              id="user_id"
+              name="user_id"
               type="text"
               required
               autoComplete="username"
