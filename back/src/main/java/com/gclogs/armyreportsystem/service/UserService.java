@@ -24,11 +24,11 @@ public class UserService {
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
         // 필수 필드 검증
-        if (!StringUtils.hasText(request.getUserId()) || 
+        if (!StringUtils.hasText(request.getUser_id()) || 
             !StringUtils.hasText(request.getPassword()) || 
             !StringUtils.hasText(request.getName()) || 
             !StringUtils.hasText(request.getRank()) ||
-            !StringUtils.hasText(request.getUnitName())) {
+            !StringUtils.hasText(request.getUnit_name())) {
             return RegisterResponse.builder()
                     .success(false)
                     .message("필수 정보가 누락되었습니다.")
@@ -36,7 +36,7 @@ public class UserService {
         }
         
         // 중복 검사
-        if (userMapper.existsByUserId(request.getUserId())) {
+        if (userMapper.existsByUserId(request.getUser_id())) {
             return RegisterResponse.builder()
                     .success(false)
                     .message("이미 존재하는 사용자입니다.")
@@ -45,15 +45,15 @@ public class UserService {
 
         // 사용자 생성
         User user = User.builder()
-                .userId(request.getUserId())
+                .user_id(request.getUser_id())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .rank(request.getRank())
                 .role(request.getRole()) // 기본값은 솔져임 (승인 절차 거쳐 권한 얻음)
                 .name(request.getName())
-                .unitName(request.getUnitName())
-                .phoneNumber(request.getPhoneNumber())
+                .unit_name(request.getUnit_name())
+                .phone_number(request.getPhone_number())
                 .email(request.getEmail())
-                .createdAt(request.getCreatedAt())
+                .created_at(request.getCreated_at())
                 .status(false) // 기본값은 0 (로그인시 1로 변경)
                 .build();
 
@@ -61,7 +61,7 @@ public class UserService {
 
         return RegisterResponse.builder()
                 .success(true)
-                .userId(user.getUserId())
+                .user_id(user.getUser_id())
                 .name(user.getName())
                 .rank(user.getRank())
                 .role(user.getRole())
@@ -73,7 +73,7 @@ public class UserService {
     @Transactional
     public LoginResponse login(LoginRequest request) {
         // findByUserId로 사용자 조회
-        User user = userMapper.findByUserId(request.getUserId());
+        User user = userMapper.findByUserId(request.getUser_id());
 
         // 사용자가 존재하지 않는 경우
         if (user == null) {
@@ -109,11 +109,11 @@ public class UserService {
         
         return UserInfoResponse.builder()
                 .success(true)
-                .userId(user.getUserId())
+                .user_id(user.getUser_id())
                 .name(user.getName())
                 .rank(user.getRank())
                 .email(user.getEmail())
-                .createdAt(user.getCreatedAt())
+                .created_at(user.getCreated_at())
                 .message("사용자 정보 조회 성공")
                 .build();
     }

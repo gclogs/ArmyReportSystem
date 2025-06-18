@@ -69,12 +69,12 @@ public class CommentService {
 
             // 신규 댓글 생성
             Comment comment = Comment.builder()
-                    .reportId(report.getReportId())
-                    .authorId(userId)
-                    .authorName(user.getName())
+                    .report_id(report.getReport_id())
+                    .author_id(userId)
+                    .author_name(user.getName())
                     .content(request.getContent())
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
+                    .created_at(LocalDateTime.now())
+                    .updated_at(LocalDateTime.now())
                     .is_deleted(false)
                     .build();
 
@@ -104,7 +104,7 @@ public class CommentService {
             }
 
             // 권한 확인 (작성자만 수정 가능)
-            if (!comment.getAuthorId().equals(userId)) {
+            if (!comment.getAuthor_id().equals(userId)) {
                 return CommentResponse.builder()
                         .success(false)
                         .message("댓글 수정 권한이 없습니다.")
@@ -113,7 +113,7 @@ public class CommentService {
 
             // 댓글 내용 및 수정일시 업데이트
             comment.setContent(request.getContent());
-            comment.setUpdatedAt(LocalDateTime.now());
+            comment.setUpdated_at(LocalDateTime.now());
 
             // DB 업데이트
             commentMapper.updateComment(comment);
@@ -141,7 +141,7 @@ public class CommentService {
             }
 
             // 권한 확인 (작성자만 삭제 가능)
-            if (!comment.getAuthorId().equals(userId)) {
+            if (!comment.getAuthor_id().equals(userId)) {
                 return CommentResponse.builder()
                         .success(false)
                         .message("댓글 삭제 권한이 없습니다.")
@@ -150,21 +150,21 @@ public class CommentService {
 
             // 논리적 삭제 처리
             comment.set_deleted(true);
-            comment.setDeletedAt(LocalDateTime.now());
+            comment.setDeleted_at(LocalDateTime.now());
 
             // DB 업데이트
-            commentMapper.deleteComment(comment.getCommentId());
+            commentMapper.deleteComment(comment.getComment_id());
 
             return CommentResponse.builder()
                     .success(true)
                     .message("댓글이 성공적으로 삭제되었습니다.")
-                    .commentId(comment.getCommentId())
-                    .reportId(comment.getReportId())
-                    .authorId(comment.getAuthorId())
-                    .authorName(comment.getAuthorName())
+                    .comment_id(comment.getComment_id())
+                    .report_id(comment.getReport_id())
+                    .author_id(comment.getAuthor_id())
+                    .author_name(comment.getAuthor_name())
                     .content(comment.getContent())
-                    .createdAt(comment.getCreatedAt())
-                    .updatedAt(comment.getUpdatedAt())
+                    .created_at(comment.getCreated_at())
+                    .updated_at(comment.getUpdated_at())
                     .is_deleted(true)
                     .build();
 
@@ -180,13 +180,13 @@ public class CommentService {
     private CommentResponse convertToResponse(Comment comment) {
         return CommentResponse.builder()
                 .success(true)
-                .commentId(comment.getCommentId())
-                .reportId(comment.getReportId())
-                .authorId(comment.getAuthorId())
-                .authorName(comment.getAuthorName())
+                .comment_id(comment.getComment_id())
+                .report_id(comment.getReport_id())
+                .author_id(comment.getAuthor_id())
+                .author_name(comment.getAuthor_name())
                 .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .updatedAt(comment.getUpdatedAt())
+                .created_at(comment.getCreated_at())
+                .updated_at(comment.getUpdated_at())
                 .is_deleted(comment.is_deleted())
                 .build();
     }

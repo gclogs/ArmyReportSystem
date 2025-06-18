@@ -1,6 +1,6 @@
 package com.gclogs.armyreportsystem.controller;
 
-import com.gclogs.armyreportsystem.service.FileStrorageService;
+import com.gclogs.armyreportsystem.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -19,7 +19,7 @@ import java.nio.file.Path;
 @RequestMapping("/api/files")
 @RequiredArgsConstructor
 public class FileController {
-    private FileStrorageService fileStrorageService;
+    private FileStorageService fileStrorageService;
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String filename) throws MalformedURLException {

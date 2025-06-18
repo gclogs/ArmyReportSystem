@@ -22,7 +22,7 @@ public class ReportService {
     private final ReportMapper reportMapper;
     private final UserMapper userMapper;
 
-    private FileStrorageService fileStrorageService;
+    private FileStorageService fileStrorageService;
 
     @Transactional
     public List<ReportResponse> getReports() {
@@ -40,16 +40,16 @@ public class ReportService {
             reportResponses.add(ReportResponse.builder()
                     .success(true)
                     .message("보고서 조회 성공")
-                    .reportId(report.getReportId())
+                    .report_id(report.getReport_id())
                     .type(report.getType())
                     .title(report.getTitle())
                     .content(report.getContent())
                     .priority(report.getPriority())
                     .status(report.getStatus())
-                    .createdAt(report.getCreatedAt())
-                    .updatedAt(report.getUpdatedAt())
-                    .authorId(report.getAuthorId())
-                    .authorName(report.getAuthorName())
+                    .created_at(report.getCreated_at())
+                    .updated_at(report.getUpdated_at())
+                    .author_id(report.getAuthor_id())
+                    .author_name(report.getAuthor_name())
                     .fileAttachments(new ArrayList<>())
                     .comments(new ArrayList<>())
                     .build());
@@ -71,17 +71,17 @@ public class ReportService {
         }
 
         Report report = Report.builder()
-                .authorId(user.getUserId())
-                .authorName(user.getName())
-                .authorRank(user.getRank())
+                .author_id(user.getUser_id())
+                .author_name(user.getName())
+                .author_rank(user.getRank())
                 .type(request.getType())
                 .title(request.getTitle())
                 .content(request.getContent())
                 .priority(request.getPriority())
                 .status("new")  // 새 보고서의 초기 상태
                 .is_deleted(false)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
+                .updated_at(LocalDateTime.now())
                 .build();
 
         reportMapper.writeReport(report);
@@ -89,16 +89,16 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서가 성공적으로 작성되었습니다.")
-                .reportId(report.getReportId())
+                .report_id(report.getReport_id())
                 .type(report.getType())
                 .title(report.getTitle())
                 .content(report.getContent())
                 .priority(report.getPriority())
                 .status(report.getStatus())
-                .createdAt(report.getCreatedAt())
-                .updatedAt(report.getUpdatedAt())
-                .authorId(report.getAuthorId())
-                .authorName(report.getAuthorName())
+                .created_at(report.getCreated_at())
+                .updated_at(report.getUpdated_at())
+                .author_id(report.getAuthor_id())
+                .author_name(report.getAuthor_name())
                 .fileAttachments(new ArrayList<>())  // 첨부 파일은 나중에 구현
                 .comments(new ArrayList<>())     // 댓글은 나중에 구현
                 .build();
@@ -156,16 +156,16 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서 조회 성공")
-                .reportId(report.getReportId())
+                .report_id(report.getReport_id())
                 .type(report.getType())
                 .title(report.getTitle())
                 .content(report.getContent())
                 .priority(report.getPriority())
                 .status(report.getStatus())
-                .createdAt(report.getCreatedAt())
-                .updatedAt(report.getUpdatedAt())
-                .authorId(report.getAuthorId())
-                .authorName(report.getAuthorName())
+                .created_at(report.getCreated_at())
+                .updated_at(report.getUpdated_at())
+                .author_id(report.getAuthor_id())
+                .author_name(report.getAuthor_name())
                 .fileAttachments(new ArrayList<>())  // 첨부 파일은 나중에 구현
                 .comments(new ArrayList<>())     // 댓글은 나중에 구현
                 .build();
@@ -196,7 +196,7 @@ public class ReportService {
         existingReport.setTitle(request.getTitle());
         existingReport.setContent(request.getContent());
         existingReport.setPriority(request.getPriority());
-        existingReport.setUpdatedAt(LocalDateTime.now());
+        existingReport.setUpdated_at(LocalDateTime.now());
         
         // DB 업데이트
         reportMapper.editReport(existingReport);
@@ -205,16 +205,16 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서가 성공적으로 수정되었습니다.")
-                .reportId(existingReport.getReportId())
+                .report_id(existingReport.getReport_id())
                 .type(existingReport.getType())
                 .title(existingReport.getTitle())
                 .content(existingReport.getContent())
                 .priority(existingReport.getPriority())
                 .status(existingReport.getStatus())
-                .createdAt(existingReport.getCreatedAt())
-                .updatedAt(existingReport.getUpdatedAt())
-                .authorId(existingReport.getAuthorId())
-                .authorName(existingReport.getAuthorName())
+                .created_at(existingReport.getCreated_at())
+                .updated_at(existingReport.getUpdated_at())
+                .author_id(existingReport.getAuthor_id())
+                .author_name(existingReport.getAuthor_name())
                 .fileAttachments(new ArrayList<>())
                 .comments(new ArrayList<>())
                 .build();
@@ -240,7 +240,7 @@ public class ReportService {
         
         // 논리적 삭제 처리
         report.set_deleted(true);
-        report.setDeletedAt(LocalDateTime.now());
+        report.setDeleted_at(LocalDateTime.now());
         
         // DB 업데이트
         reportMapper.deleteReport(report);
@@ -248,13 +248,13 @@ public class ReportService {
         return ReportResponse.builder()
                 .success(true)
                 .message("보고서를 성공적으로 삭제하였습니다.")
-                .reportId(report.getReportId())
+                .report_id(report.getReport_id())
                 .type(report.getType())
                 .title(report.getTitle())
                 .content(report.getContent())
                 .status(report.getStatus())
                 .is_deleted(true)
-                .deletedAt(report.getDeletedAt())
+                .deleted_at(report.getDeleted_at())
                 .build();
     }
 }
