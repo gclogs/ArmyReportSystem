@@ -1,47 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.gclogs.armyreportsystem.mapper.UserMapper">
-    <!-- 결과 매핑 정의 -->
-    <resultMap id="UserResultMap" type="com.gclogs.armyreportsystem.domain.User">
-        <id property="userId" column="user_id" />
-        <result property="password" column="password" />
-        <result property="rank" column="rank" />
-        <result property="role" column="role" />
-        <result property="name" column="name" />
-        <result property="unitName" column="unit_name" />
-        <result property="phoneNumber" column="phone_number" />
-        <result property="email" column="email" />
-        <result property="status" column="status" />
-        <result property="createdAt" column="created_at" />
-    </resultMap>
-
     <insert id="insert" parameterType="com.gclogs.armyreportsystem.domain.User">
         INSERT INTO user (
             user_id, password, rank, role, name, unit_name, phone_number, email,
             created_at, status
         ) VALUES (
-            #{userId}, #{password}, #{rank}, #{role}, #{name}, #{unitName}, #{phoneNumber}, #{email},
+            #{user_id}, #{password}, #{rank}, #{role}, #{name}, #{unit_name}, #{phone_number}, #{email},
             NOW(), #{status}
         )
     </insert>
 
-    <select id="findByUserId" resultMap="UserResultMap">
+    <select id="findByUserId" resultType="com.gclogs.armyreportsystem.domain.User">
         SELECT 
-            user_id, 
+            user_id as user_id,
             password,
             rank,
             role,
             name,
-            unit_name,
-            phone_number,
+            unit_name as unit_name,
+            phone_number as phone_number,
             email,
             DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') as created_at,
             status
         FROM user 
-        WHERE user_id = #{userId}
+        WHERE user_id = #{user_id}
     </select>
 
     <select id="existsByUserId" resultType="boolean">
-        SELECT EXISTS (SELECT 1 FROM user WHERE user_id = #{userId})
+        SELECT EXISTS (SELECT 1 FROM user WHERE user_id = #{user_id})
     </select>
 </mapper>

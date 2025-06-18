@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileAttachment {
-    private String attachmentId;
-    private String reportId;
-    private String fileName;    // 원본 파일명
-    private String storedPath; // 저장된 경로
-    private String fileType;   // 파일 타입
-    private Long fileSize;     // 파일 크기
-    private LocalDateTime uploadedAt; // 업로드 시간
+    private String attachment_id;
+    private String report_id;
+    private String file_name;    // 원본 파일명
+    private String stored_path; // 저장된 경로
+    private String file_type;   // 파일 타입
+    private Long file_size;     // 파일 크기
+    private LocalDateTime uploaded_at; // 업로드 시간
 }

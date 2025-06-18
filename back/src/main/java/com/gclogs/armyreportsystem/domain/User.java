@@ -14,14 +14,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    private String userId;
+    private String user_id;
     private String password;
     private String rank;
     private String role;
     private String name;
-    private String unitName;
-    private String phoneNumber;
+    private String unit_name;
+    private String phone_number;
     private String email;
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
     private boolean status;
 }

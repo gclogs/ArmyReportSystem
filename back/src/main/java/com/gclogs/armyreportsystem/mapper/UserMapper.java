@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface UserMapper {
     void insert(User user);
-    User findByUserId(String userId);
-    boolean existsByUserId(String userId);
+    User findByUserId(@Param("user_id") String userId);
+    boolean existsByUserId(@Param("user_id") String userId);
 }

@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 public class RegisterResponse {
     private final boolean success;          // 회원가입 성공 여부
-    private final String userId;            // 군번
+    private final String user_id;            // 군번
     private final String name;              // 주성명
     private final String rank;              // 계급
     private final String role;              // 회원 구분
