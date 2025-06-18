@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import GlobalStyle from './GlobalStyle';
 import './App.css'
-import useAuthStore from './stores/authStore';
+import { getCookie } from './lib/cookies';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,18 +22,18 @@ const queryClient = new QueryClient({
 });
 
 function AuthRedirect({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const accessToken = getCookie('access_token');
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isAuthenticated) {
+  if (accessToken) {
     return <Navigate to="/" replace />;
   }
   return <>{children}</>;
 }
 
 function AuthCheck({ children }: { children: React.ReactNode }) {
-  const user = useAuthStore();
-  if(!user) {
+  const accessToken = getCookie('access_token');
+  
+  if (!accessToken) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>
