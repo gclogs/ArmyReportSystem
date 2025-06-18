@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReportForm } from '../components/reports/ReportForm';
 import { ReportList } from '../components/reports/ReportList';
 import { ReportDetail } from '../components/reports/ReportDetail';
 import { Button } from '../components/common/Button';
-import type { ReportFormData, Report, ReportStatus } from '../schemas/report';
 import HomeTab from '../components/home/HomeTab';
 import { useLocation } from 'react-router-dom';
 import { IoAddCircle, IoFilter, IoSearch, IoGrid, IoList } from 'react-icons/io5';
-import useAuthStore from '../stores/authStore';
 import { useReports } from '../hooks/useReports';
+import { ReportStatus } from '../schemas/report';
 
 // 군대 테마에 맞는 색상 정의
 const colors = {
@@ -219,7 +217,6 @@ const ModalContent = styled.div`
 `;
 
 const Reports: React.FC = () => {
-  const { user } = useAuthStore();
   const location = useLocation();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isGridView, setIsGridView] = useState(false);
@@ -307,15 +304,14 @@ const Reports: React.FC = () => {
           <ModalContent onClick={e => e.stopPropagation()}>
             <ReportDetail
               report={selectedReport}
-              isOfficer={user?.role === 'OFFICER'}
               onStatusChange={(status: ReportStatus) => updateReportStatus(selectedReport.id, status)}
             />
             <CommentsSection>
               {filteredComments.map((comment, index) => (
                 <CommentItem key={index}>
                   <CommentHeader>
-                    <CommentAuthor>{comment.authorName || 'Anonymous'}</CommentAuthor>
-                    <CommentDate>{new Date(comment.createdAt).toLocaleString()}</CommentDate>
+                    <CommentAuthor>{comment.author_name || 'Anonymous'}</CommentAuthor>
+                    <CommentDate>{new Date(comment.created_at).toLocaleString()}</CommentDate>
                   </CommentHeader>
                   <CommentContent>{comment.content}</CommentContent>
                 </CommentItem>
