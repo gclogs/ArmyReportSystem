@@ -16,20 +16,20 @@ export const LocationSchema = z.object({
 
 export const CommentSchema = z.object({
   id: z.string(),
-  reportId: z.string(),
-  authorId: z.string(),
-  authorName: z.string(),
+  report_id: z.string(),
+  author_id: z.string(),
+  author_name: z.string(),
   content: z.string(),
-  createdAt: z.string(),
+  created_at: z.string(),
 });
 
 export const AttachmentSchema = z.object({
   id: z.string(),
-  reportId: z.string(),
-  fileUrl: z.string(),
-  fileName: z.string(),
-  fileType: z.string(),
-  createdAt: z.string(),
+  report_id: z.string(),
+  file_url: z.string(),
+  file_name: z.string(),
+  file_type: z.string(),
+  created_at: z.string(),
 });
 
 export const ReportSchema = z.object({
@@ -40,13 +40,13 @@ export const ReportSchema = z.object({
   status: ReportStatusSchema,
   priority: ReportPrioritySchema,
   location: LocationSchema.optional(),
-  authorId: z.string(),
-  authorName: z.string(),
-  assigneeId: z.string().optional(),
-  assigneeName: z.string().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-  resolvedAt: z.string().optional(),
+  author_id: z.string(),
+  author_name: z.string(),
+  assignee_id: z.string().optional(),
+  assignee_name: z.string().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  resolved_at: z.string().optional(),
   attachments: z.array(AttachmentSchema).optional(),
   comments: z.array(CommentSchema).optional(),
 });
