@@ -333,7 +333,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
             <ReportTitle>
               {isImportantReport(report) && <ImportantIcon size={18} />}
               {report.title}
-              {isNewReport(report.createdAt) && <NewLabel>NEW</NewLabel>}
+              {isNewReport(report.created_at) && <NewLabel>NEW</NewLabel>}
             </ReportTitle>
             <BadgeContainer>
               <PriorityBadge priority={report.priority}>
@@ -354,7 +354,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
             <MetaLeft>
               <MetaItem>
                 <IoPerson size={16} />
-                {report.authorName}
+                {report.author_name}
               </MetaItem>
               {report.location && (
                 <MetaItem>
@@ -365,7 +365,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
             </MetaLeft>
             <MetaRight>
               <IoCalendar size={16} />
-              {formatDate(report.createdAt)}
+              {formatDate(report.created_at)}
             </MetaRight>
           </ReportMeta>
         </ReportItem>

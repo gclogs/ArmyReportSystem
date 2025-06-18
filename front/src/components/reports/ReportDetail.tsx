@@ -193,7 +193,6 @@ const CommentInput = styled.input`
 
 interface ReportDetailProps {
   report: Report;
-  isOfficer: boolean;
   onStatusChange: (status: ReportStatus) => void;
   onCommentSubmit?: (comment: string) => void;
 }
@@ -267,7 +266,6 @@ const StyledSelect = styled.select`
 
 const ReportDetail: React.FC<ReportDetailProps> = ({
   report,
-  isOfficer,
   onStatusChange,
   onCommentSubmit,
 }) => {
@@ -302,8 +300,7 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
               </PriorityBadge>
             </Title>
           </div>
-          {isOfficer && (
-            <Actions>
+          <Actions>
               <StyledSelect
                 value={report.status}
                 onChange={(e) => onStatusChange(e.target.value as ReportStatus)}
@@ -323,7 +320,6 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
                 <option value="urgent">긴급</option>
               </StyledSelect>
             </Actions>
-          )}
         </Header>
 
         <MetaInfo>
@@ -331,20 +327,20 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#999"/>
             </svg>
-            작성자: {report.authorName}
+            작성자: {report.author_name}
           </span>
           <span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M11.99 2C6.47 2 2 6.48 2 12C2 17.52 6.47 22 11.99 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 11.99 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20ZM12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="#999"/>
             </svg>
-            작성일: {new Date(report.createdAt).toLocaleString()}
+            작성일: {new Date(report.created_at).toLocaleString()}
           </span>
-          {report.assigneeName && (
+          {report.assignee_name && (
             <span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19 3H14.82C14.4 1.84 13.3 1 12 1C10.7 1 9.6 1.84 9.18 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM12 3C12.55 3 13 3.45 13 4C13 4.55 12.55 5 12 5C11.45 5 11 4.55 11 4C11 3.45 11.45 3 12 3ZM12 7C13.66 7 15 8.34 15 10C15 11.66 13.66 13 12 13C10.34 13 9 11.66 9 10C9 8.34 10.34 7 12 7ZM18 19H6V17.6C6 15.6 10 14.5 12 14.5C14 14.5 18 15.6 18 17.6V19Z" fill="#999"/>
               </svg>
-              담당자: {report.assigneeName}
+              담당자: {report.assignee_name}
             </span>
           )}
         </MetaInfo>
@@ -358,14 +354,14 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
             {report.attachments.map((attachment) => (
               <AttachmentItem
                 key={attachment.id}
-                href={attachment.fileUrl}
+                href={attachment.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
                   <path d="M14 2H6C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z" fill="#666"/>
                 </svg>
-                {attachment.fileName}
+                {attachment.file_name}
               </AttachmentItem>
             ))}
           </AttachmentList>
@@ -397,9 +393,9 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
           {report.comments?.map((comment) => (
             <CommentItem key={comment.id}>
               <CommentHeader>
-                <CommentAuthor>{comment.authorName}</CommentAuthor>
+                <CommentAuthor>{comment.author_name}</CommentAuthor>
                 <CommentDate>
-                  {new Date(comment.createdAt).toLocaleString()}
+                  {new Date(comment.created_at).toLocaleString()}
                 </CommentDate>
               </CommentHeader>
               <CommentContent>{comment.content}</CommentContent>
