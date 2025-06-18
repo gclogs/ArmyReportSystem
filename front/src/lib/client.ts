@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { deleteCookie, getCookie } from './cookies';
 
 // 사용자 캐시 키 (민감하지 않은 정보용)
 const USER_CACHE_KEY = import.meta.env.VITE_AUTH_USER_KEY || 'auth_user_cache';
@@ -20,19 +21,9 @@ export function createApiClient(): AxiosInstance {
   // 요청 인터셉터 설정
   apiClient.interceptors.request.use(
     (config) => {
-      const userStr = localStorage.getItem(USER_CACHE_KEY);
-      let user = null;
-      
-      if (userStr) {
-        try {
-          user = JSON.parse(userStr);
-          // 추가 헤더가 필요한 경우 여기서 설정 (토큰은 이제 쿠키로 자동 전송)
-          if (user && user.id) {
-            config.headers['userId'] = user.id;
-          }
-        } catch (error) {
-          console.error('Failed to parse user data:', error);
-        }
+      const accessToken = getCookie('access_token');
+      if (accessToken) {
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
       }
       
       return config;
@@ -49,7 +40,7 @@ export function createApiClient(): AxiosInstance {
       // 401 에러 처리 등 공통 에러 핸들링
       if (error.response && error.response.status === 401) {
         // 로컬 스토리지의 캐시된 사용자 정보만 삭제
-        localStorage.removeItem(USER_CACHE_KEY);
+        deleteCookie('access_token');
         
         // 로그인 페이지로 리다이렉트
         window.location.href = '/login';

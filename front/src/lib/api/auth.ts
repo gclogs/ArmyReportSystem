@@ -1,20 +1,28 @@
 import { getApiClient } from '../client';
 
-export interface Tokens {
-    accessToken: string;
-    refreshToken: string;
+export interface AuthResponse {
+    user_id: string;
+    name: string;
+    unit_name: string;
+    email: string;
+    rank: string;
+    access_token: string;
+    refresh_token: string;
+    token_type: string;
+    access_token_expires_in: number;
+    refresh_token_expires_in: number;
+    success: boolean;
+    message: string;
 }
 
-export async function login(userId: string, password: string) {
-      const response = await getApiClient().post('/auth/login', {
-        userId, 
+export async function login(userId: string, password: string): Promise<AuthResponse> {
+    const response = await getApiClient().post('/auth/login', {
+        user_id: userId, 
         password
-      });
-
-      const data = response.data;
+    });
       
-      return data;
-  }
+    return response.data;
+}
 
 export async function register(
     userId: string,
@@ -24,39 +32,25 @@ export async function register(
     unitName: string,
     phoneNumber?: string,
     email?: string
-  ) {
-      const result = await getApiClient().post('/auth/register', {
-        userId,
+) {
+    const result = await getApiClient().post('/auth/register', {
+        user_id: userId,
         password,
         name,
         rank,
-        unitName,
-        phoneNumber,
+        unit_name: unitName,
+        phone_number: phoneNumber,
         email,
-      });
+    });
 
-      return result;
-  }
-
-export async function getMyAccount(accessToken?: string) {
-      const response = await getApiClient().get('/auth/me', {
-        headers: accessToken
-        ? {
-          Authorization: `Bearer ${accessToken}`,
-        } 
-        : {}, 
-      });
-      return response.data;
-  }
+    return result;
+}
 
 export async function logout() {
     await getApiClient().post('/auth/logout');
 }
 
-export async function refreshTokens() {
-    const response = await getApiClient().post<Tokens>('/auth/refresh');
-    const tokens = response.data;
-    const headers = response.headers;
-    
-    return { tokens, headers };
+export async function refreshTokens(): Promise<AuthResponse> {
+    const response = await getApiClient().post('/auth/refresh');
+    return response.data;
 }
