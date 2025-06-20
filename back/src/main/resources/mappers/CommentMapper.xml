@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gclogs.armyreportsystem.mapper.CommentMapper">
+
+    <!-- 댓글 저장 -->
+    <insert id="createComment" parameterType="com.gclogs.armyreportsystem.domain.Comment">
+        INSERT INTO report_comments (
+            comment_id,
+            report_id,
+            user_id,
+            content,
+            created_at,
+            updated_at,
+            is_deleted
+        ) VALUES (
+            #{comment_id},
+            #{report_id},
+            #{user_id},
+            #{content},
+            #{created_at},
+            #{updated_at},
+            #{is_deleted}
+        )
+    </insert>
+
+    <!-- 특정 리포트의 모든 댓글 조회 -->
+    <select id="findCommentsByReportId" resultType="com.gclogs.armyreportsystem.domain.Comment">
+        SELECT
+            c.comment_id,
+            c.report_id,
+            c.author_id,
+            c.content,
+            c.created_at,
+            c.updated_at,
+            c.is_deleted,
+            u.name,
+            u.rank
+        FROM
+            report_comments c
+        LEFT JOIN
+            user u ON c.author_id = u.user_id COLLATE utf8mb4_unicode_ci
+        WHERE
+            c.report_id = #{report_id}
+        ORDER BY
+            c.created_at ASC
+    </select>
+
+    <!-- 댓글 ID로 단일 댓글 조회 -->
+    <select id="findCommentById" resultType="com.gclogs.armyreportsystem.domain.Comment">
+        SELECT
+            c.comment_id,
+            c.report_id,
+            c.author_id,
+            c.content,
+            c.created_at,
+            c.updated_at,
+            c.is_deleted,
+            u.name,
+            u.rank
+        FROM
+            report_comments c
+        LEFT JOIN
+            user u ON c.author_id = u.user_id COLLATE utf8mb4_unicode_ci
+        WHERE
+            c.comment_id = #{comment_id}
+    </select>
+
+    <!-- 댓글 수정 -->
+    <update id="updateComment" parameterType="com.gclogs.armyreportsystem.domain.Comment">
+        UPDATE report_comments
+        SET
+            content = #{content},
+            updated_at = #{updated_at}
+        WHERE
+            comment_id = #{comment_id}
+    </update>
+
+    <!-- 댓글 삭제 (논리적 삭제) -->
+    <update id="deleteComment">
+        UPDATE report_comments
+        SET
+            is_deleted = true,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE
+            comment_id = #{comment_id}
+    </update>
+
+    <!-- 리포트 ID로 댓글 수 조회 -->
+    <select id="countByReportId" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            report_comments
+        WHERE
+            report_id = #{report_id}
+            AND is_deleted = false
+    </select>
+
+    <!-- 리포트 ID로 댓글 삭제 (리포트 삭제 시 관련 댓글 모두 삭제) -->
+    <update id="deleteAllByReportId">
+        UPDATE report_comments
+        SET
+            is_deleted = true,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE
+            report_id = #{report_id}
+    </update>
+
+</mapper>

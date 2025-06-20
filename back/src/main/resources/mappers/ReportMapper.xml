@@ -14,7 +14,7 @@
     </select>
     
     <!-- 사용자 ID로 보고서 찾기 -->
-    <select id="findReportByUserId" parameterType="String" resultType="com.gclogs.armyreportsystem.domain.Report">
+    <select id="findReportByUserId" parameterType="Long" resultType="com.gclogs.armyreportsystem.domain.Report">
         SELECT 
             r.*
         FROM 
@@ -28,7 +28,7 @@
     </select>
     
     <!-- 보고서 ID로 보고서 찾기 -->
-    <select id="findReportById" parameterType="String" resultType="com.gclogs.armyreportsystem.domain.Report">
+    <select id="findReportById" parameterType="Long" resultType="com.gclogs.armyreportsystem.domain.Report">
         SELECT 
             r.*
         FROM 
@@ -179,7 +179,7 @@
     </insert>
     
     <!-- 보안 강화: 암호화된 보고서 내용 읽기 -->
-    <select id="findEncryptedReportById" parameterType="String" resultType="com.gclogs.armyreportsystem.domain.Report">
+    <select id="findEncryptedReportById" parameterType="Long" resultType="com.gclogs.armyreportsystem.domain.Report">
         SELECT 
             r.report_id,
             r.author_id,
