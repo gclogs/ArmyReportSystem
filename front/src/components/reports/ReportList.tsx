@@ -328,7 +328,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
   return (
     <ListContainer>
       {reports.map((report) => (
-        <ReportItem key={report.id} onClick={() => onReportClick(report)}>
+        <ReportItem key={report.report_id} onClick={() => onReportClick(report)}>
           <ReportHeader>
             <ReportTitle>
               {isImportantReport(report) && <ImportantIcon size={18} />}

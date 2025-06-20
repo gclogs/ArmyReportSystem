@@ -273,8 +273,9 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (comment.trim() && onCommentSubmit) {
-      onCommentSubmit(comment);
+      onCommentSubmit(comment.trim());
       setComment('');
     }
   };
@@ -353,7 +354,7 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
           <AttachmentList>
             {report.attachments.map((attachment) => (
               <AttachmentItem
-                key={attachment.id}
+                key={attachment.attachment_id}
                 href={attachment.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -391,7 +392,7 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
         </CommentForm>
         <CommentList>
           {report.comments?.map((comment) => (
-            <CommentItem key={comment.id}>
+            <CommentItem key={comment.comment_id}>
               <CommentHeader>
                 <CommentAuthor>{comment.author_name}</CommentAuthor>
                 <CommentDate>

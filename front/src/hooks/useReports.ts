@@ -52,17 +52,19 @@ export const useReports = (selectedReportId?: string) => {
 
   // 선택된 보고서의 댓글 가져오기
   const { data: comments } = useQuery<Comment[]>({
-    queryKey: ['comments', selectedReport?.id],
+    queryKey: ['comments', selectedReport?.report_id],
     queryFn: async () => {
       try {
-        const response = await getApiClient().get(`/reports/comments`);
+        // report_id를 숫자로 변환
+        const reportId = Number(selectedReport?.report_id);
+        const response = await getApiClient().get(`/reports/${reportId}/comments`);
         return response.data;
       } catch (error) {
         console.error('댓글 가져오기 실패:', error);
         return [];
       }
     },
-    enabled: !!selectedReport?.id
+    enabled: !!selectedReport?.report_id
   });
 
   // 보고서 작성 함수
@@ -106,6 +108,38 @@ export const useReports = (selectedReportId?: string) => {
       return response.data;
     } catch (error: any) {
       console.error('보고서 상태 업데이트 실패:', error);
+      
+      // 401, 403 에러 시 로그인 페이지로 리다이렉트
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        navigate('/login', { 
+          state: { 
+            from: location.pathname,
+            message: '세션이 만료되었습니다. 다시 로그인해 주세요.' 
+          } 
+        });
+      }
+      
+      throw error;
+    }
+  };
+
+  // 댓글 작성 함수
+  const addComment = async (reportId: string, content: string) => {
+    try {
+      // 토큰이 없으면 에러 발생
+      if (!accessToken) {
+        throw new Error('인증이 필요합니다');
+      }
+      
+      // reportId를 숫자로 변환
+      const numericReportId = Number(reportId);
+      const response = await getApiClient().post(`/reports/${numericReportId}/comments`, { content });
+      // 댓글 목록과 보고서 목록 모두 갱신
+      queryClient.invalidateQueries({ queryKey: ['comments', reportId] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      return response.data;
+    } catch (error: any) {
+      console.error('댓글 작성 실패:', error);
       
       // 401, 403 에러 시 로그인 페이지로 리다이렉트
       if (error?.response?.status === 401 || error?.response?.status === 403) {
@@ -187,6 +221,7 @@ export const useReports = (selectedReportId?: string) => {
     selectedReport,
     setSelectedReport,
     createReport,
-    updateReportStatus
+    updateReportStatus,
+    addComment
   };
 };

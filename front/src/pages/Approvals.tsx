@@ -174,7 +174,7 @@ const Approvals: React.FC = () => {
 
       <ApprovalList>
         {pendingReports?.map((report) => (
-          <ApprovalCard key={report.id}>
+          <ApprovalCard key={report.report_id}>
             <CardHeader>
               <ReportTitle>{report.title}</ReportTitle>
               <PriorityBadge priority={report.priority}>
@@ -190,16 +190,16 @@ const Approvals: React.FC = () => {
 
             <CardFooter>
               <MetaInfo>
-                작성자: {report.authorId} | 작성일: {new Date(report.createdAt).toLocaleDateString()}
+                작성자: {report.author_id} | 작성일: {new Date(report.created_at).toLocaleDateString()}
               </MetaInfo>
               <ButtonGroup>
-                <Button onClick={() => handleViewDetails(report.id)}>
+                <Button onClick={() => handleViewDetails(report.report_id)}>
                   상세보기
                 </Button>
-                <Button variant="primary" onClick={() => handleApprove(report.id)}>
+                <Button variant="primary" onClick={() => handleApprove(report.report_id)}>
                   승인
                 </Button>
-                <Button variant="danger" onClick={() => handleReject(report.id)}>
+                <Button variant="danger" onClick={() => handleReject(report.report_id)}>
                   반려
                 </Button>
               </ButtonGroup>

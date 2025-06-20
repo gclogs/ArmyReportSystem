@@ -15,7 +15,7 @@ export const LocationSchema = z.object({
 });
 
 export const CommentSchema = z.object({
-  id: z.string(),
+  comment_id: z.string(),
   report_id: z.string(),
   author_id: z.string(),
   author_name: z.string(),
@@ -24,7 +24,7 @@ export const CommentSchema = z.object({
 });
 
 export const AttachmentSchema = z.object({
-  id: z.string(),
+  attachment_id: z.string(),
   report_id: z.string(),
   file_url: z.string(),
   file_name: z.string(),
@@ -33,7 +33,7 @@ export const AttachmentSchema = z.object({
 });
 
 export const ReportSchema = z.object({
-  id: z.string(),
+  report_id: z.string(),
   type: ReportTypeSchema,
   title: z.string().min(1, '제목을 입력해주세요'),
   content: z.string().min(1, '내용을 입력해주세요'),
