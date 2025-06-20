@@ -3,24 +3,24 @@ import { z } from 'zod';
 export const RoleSchema = z.enum(['SOLDIER', 'OFFICER', 'ADMIN']);
 export const RankSchema = z.enum([
   // 병사 계급
-  'PVT',    // 이등병
-  'PFC',    // 일병
-  'CPL',    // 상병
-  'SGT',    // 병장
+  '이등병',
+  '일병',
+  '상병',
+  '병장',
   
   // 부사관 계급
-  'SSG',    // 하사
-  'SFC',    // 중사
-  'MSG',    // 상사
-  'SGM',    // 원사
+  '하사',
+  '중사',
+  '상사',
+  '원사',
   
   // 장교 계급
-  'LT',     // 소위
-  'CPT',    // 중위
-  'MAJ',    // 대위
-  'LTC',    // 소령
-  'COL',    // 중령
-  'BG',     // 대령
+  '소위',
+  '중위',
+  '대위',
+  '소령',
+  '중령',
+  '대령',
 ]);
 
 export const UnitSchema = z.object({

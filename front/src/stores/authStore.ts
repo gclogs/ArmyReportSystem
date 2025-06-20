@@ -8,7 +8,6 @@ interface AuthState {
     userId: string | null;
     name: string | null;
     unitName: string | null;
-    email: string | null;
     rank: string | null;
     isLoading: boolean;
     isAuthenticated: boolean;
@@ -25,7 +24,6 @@ const useAuthStore = create<AuthState>()(
             userId: null,
             name: null,
             unitName: null,
-            email: null,
             rank: null,
             isLoading: false,
             isAuthenticated: false,
@@ -54,7 +52,6 @@ const useAuthStore = create<AuthState>()(
                         userId: user_id, 
                         name,
                         unitName: unit_name,
-                        email,
                         rank,
                         isAuthenticated: true, 
                         isLoading: false 
@@ -75,7 +72,7 @@ const useAuthStore = create<AuthState>()(
                 }
                 
                 deleteCookie('access_token');
-                set({ userId: null, name: null, unitName: null, email: null, rank: null, isAuthenticated: false });
+                set({ userId: null, name: null, unitName: null, rank: null, isAuthenticated: false });
             },
             
             hasPermission: (permission: Permission) => {
@@ -91,7 +88,6 @@ const useAuthStore = create<AuthState>()(
                 userId: state.userId,
                 name: state.name,
                 unitName: state.unitName,
-                email: state.email,
                 rank: state.rank,
                 isAuthenticated: state.isAuthenticated
             }),
