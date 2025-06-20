@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS reports (
     INDEX idx_type (type),
     INDEX idx_status (status),
     INDEX idx_is_deleted (is_deleted)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 보고서 액세스 로그 테이블
 CREATE TABLE IF NOT EXISTS report_access_logs (
@@ -29,12 +29,12 @@ CREATE TABLE IF NOT EXISTS report_access_logs (
     access_time TIMESTAMP NOT NULL,
     ip_address VARCHAR(50),
     user_agent TEXT,
-    
+
     FOREIGN KEY (report_id) REFERENCES reports(report_id),
     INDEX idx_report_id (report_id),
     INDEX idx_user_id (user_id),
     INDEX idx_access_time (access_time)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 보고서 첨부파일 테이블
 CREATE TABLE IF NOT EXISTS report_files (
@@ -45,10 +45,10 @@ CREATE TABLE IF NOT EXISTS report_files (
     file_size BIGINT NOT NULL,
     file_type VARCHAR(100) NOT NULL,
     upload_time TIMESTAMP NOT NULL,
-    
+
     FOREIGN KEY (report_id) REFERENCES reports(report_id),
     INDEX idx_report_id (report_id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 보고서 댓글 테이블
 CREATE TABLE IF NOT EXISTS report_comments (
@@ -62,12 +62,12 @@ CREATE TABLE IF NOT EXISTS report_comments (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP,
-    
+
     FOREIGN KEY (report_id) REFERENCES reports(report_id),
     INDEX idx_report_id (report_id),
     INDEX idx_author_id (author_id),
     INDEX idx_is_deleted (is_deleted)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 보안 강화: 데이터베이스 이벤트 트리거
 DELIMITER //
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS report_audit_logs (
     action VARCHAR(50) NOT NULL,
     action_time TIMESTAMP NOT NULL,
     user_id VARCHAR(255),
-    
+
     INDEX idx_report_id (report_id),
     INDEX idx_action (action),
     INDEX idx_action_time (action_time)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

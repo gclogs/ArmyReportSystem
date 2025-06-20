@@ -1,11 +1,11 @@
 -- 샘플 유저 데이터 추가
 INSERT INTO user (user_id, password, rank, role, name, unit_name, phone_number, email, created_at, status)
 VALUES 
-('admin123', '$2a$10$rqGUdL7Uiy4Xg2E5XahFP.pxl7zsBQBaUgL0qBGcmO8pz5UdBQrWG', '대령', 'ADMIN', '관리자', '본부', '010-1234-5678', 'admin@army.mil.kr', NOW(), TRUE),
-('101', '$2a$10$hO5JZ7MoLCspEjJlOgx3xuembeI9zrJ/QLFgU0l57L.XLmmOX1PAC', '대위', 'OFFICER', '김대위', '제2보급대', '010-9876-5432', 'kim@army.mil.kr', NOW(), TRUE),
-('102', '$2a$10$hO5JZ7MoLCspEjJlOgx3xuembeI9zrJ/QLFgU0l57L.XLmmOX1PAC', '중사', 'SOLDIER', '이중사', '훈련부대', '010-1122-3344', 'lee@army.mil.kr', NOW(), TRUE),
-('103', '$2a$10$hO5JZ7MoLCspEjJlOgx3xuembeI9zrJ/QLFgU0l57L.XLmmOX1PAC', '대령', 'OFFICER', '박대령', '사령부', '010-5566-7788', 'park@army.mil.kr', NOW(), TRUE),
-('104', '$2a$10$hO5JZ7MoLCspEjJlOgx3xuembeI9zrJ/QLFgU0l57L.XLmmOX1PAC', '상사', 'SOLDIER', '최상사', '의무대', '010-9900-1122', 'choi@army.mil.kr', NOW(), TRUE);
+('admin123', '$2a$10$9tRQuFGKFUGXKk9k8pyKAe5PFzeZKNixBN36k9cenGYLAFp.v0qKO', '대령', 'ADMIN', '관리자', '본부', '010-1234-5678', 'admin@army.mil.kr', NOW(), TRUE),
+('101', '$2a$10$9tRQuFGKFUGXKk9k8pyKAe5PFzeZKNixBN36k9cenGYLAFp.v0qKO', '대위', 'OFFICER', '김대위', '제2보급대', '010-9876-5432', 'kim@army.mil.kr', NOW(), TRUE),
+('102', '$2a$10$9tRQuFGKFUGXKk9k8pyKAe5PFzeZKNixBN36k9cenGYLAFp.v0qKO', '중사', 'SOLDIER', '이중사', '훈련부대', '010-1122-3344', 'lee@army.mil.kr', NOW(), TRUE),
+('103', '$2a$10$9tRQuFGKFUGXKk9k8pyKAe5PFzeZKNixBN36k9cenGYLAFp.v0qKO', '대령', 'OFFICER', '박대령', '사령부', '010-5566-7788', 'park@army.mil.kr', NOW(), TRUE),
+('104', '$2a$10$9tRQuFGKFUGXKk9k8pyKAe5PFzeZKNixBN36k9cenGYLAFp.v0qKO', '상사', 'SOLDIER', '최상사', '의무대', '010-9900-1122', 'choi@army.mil.kr', NOW(), TRUE);
 
 -- 샘플 보고서 데이터 추가
 INSERT INTO reports (report_id, author_id, author_name, author_rank, type, title, content, priority, status, created_at, updated_at)
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS report_locations (
     
     FOREIGN KEY (report_id) REFERENCES reports(report_id),
     INDEX idx_report_id (report_id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 보고서 위치 샘플 데이터 추가
 INSERT INTO report_locations (report_id, latitude, longitude, description)
