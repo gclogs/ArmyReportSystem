@@ -13,4 +13,6 @@ public interface CommentMapper {
     void createComment(Comment comment);
     void updateComment(Comment comment);
     void deleteComment(Long commentId);
+    void deleteAllByReportId(Long reportId);
+    Integer countByReportId(Long reportId);
 }

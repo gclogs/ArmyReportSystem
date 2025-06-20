@@ -1,6 +1,7 @@
 // com.gclogs.armyreportsystem.controller.CommentController.java
 package com.gclogs.armyreportsystem.controller;
 
+import com.gclogs.armyreportsystem.domain.Comment;
 import com.gclogs.armyreportsystem.dto.CommentRequest;
 import com.gclogs.armyreportsystem.dto.CommentResponse;
 import com.gclogs.armyreportsystem.service.CommentService;
@@ -9,55 +10,47 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/reports/{reportId}/comments")
+@RequestMapping("/api/reports")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    @GetMapping
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long reportId) {
-        List<CommentResponse> comments = commentService.getCommentsByReportId(reportId);
-        return ResponseEntity.ok(comments);
+    @GetMapping("/{reportId}/comments")
+    public ResponseEntity<?> getCommentsByReportId(@PathVariable("reportId") Long reportId) {
+        var comments = commentService.getCommentsByReportId(reportId);
+
+        Map<String, List<CommentResponse>> response = new HashMap<>();
+        response.put("data", comments);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping
+    @PostMapping("/{reportId}/comments")
     public ResponseEntity<CommentResponse> createComment(
-            @PathVariable Long reportId,
-            @RequestAttribute("userId") String userId,
-            @Valid @RequestBody CommentRequest request) {
-        CommentResponse response = commentService.createComment(reportId, userId, request);
-        if (!response.isSuccess()) {
-            return ResponseEntity.badRequest().body(response);
-        }
-        return ResponseEntity.ok(response);
+            @PathVariable("reportId") Long reportId,
+            @Valid @RequestHeader("userId") String userId,
+            @RequestBody CommentRequest request) {
+        return ResponseEntity.ok(commentService.createComment(reportId, userId, request));
     }
 
-    @PutMapping("/{commentId}")
+    @PutMapping("/{reportId}/comments/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(
-            @PathVariable Long reportId,
-            @PathVariable Long commentId,
-            @RequestAttribute("userId") String userId,
-            @Valid @RequestBody CommentRequest request) {
-        CommentResponse response = commentService.updateComment(commentId, userId, request);
-        if (!response.isSuccess()) {
-            return ResponseEntity.badRequest().body(response);
-        }
-        return ResponseEntity.ok(response);
+            @PathVariable("commentId") Long commentId,
+            @RequestHeader("userId") String userId,
+            @RequestBody CommentRequest request) {
+        return ResponseEntity.ok(commentService.updateComment(commentId, userId, request));
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/{reportId}/comments/{commentId}")
     public ResponseEntity<CommentResponse> deleteComment(
-            @PathVariable Long reportId,
-            @PathVariable Long commentId,
-            @RequestAttribute("userId") String userId) {
-        CommentResponse response = commentService.deleteComment(commentId, userId);
-        if (!response.isSuccess()) {
-            return ResponseEntity.badRequest().body(response);
-        }
-        return ResponseEntity.ok(response);
+            @PathVariable("reportId") Long reportId,
+            @PathVariable("commentId") Long commentId,
+            @RequestHeader("userId") String userId) {
+        return ResponseEntity.ok(commentService.deleteComment(commentId, userId));
     }
 }
