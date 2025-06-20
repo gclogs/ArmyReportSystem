@@ -98,7 +98,7 @@ const HomeTab: React.FC = () => {
     const tabs = [
         { path: '/reports/recommended', label: '필독' },
         { path: '/reports/recent', label: '최신' },
-        { path: '/reports/me', label: '내 보고서' },
+        { path: '/', label: '내 보고서' },
     ];
 
     return (

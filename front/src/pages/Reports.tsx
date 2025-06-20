@@ -4,7 +4,6 @@ import { ReportForm } from '../components/reports/ReportForm';
 import { ReportList } from '../components/reports/ReportList';
 import { ReportDetail } from '../components/reports/ReportDetail';
 import { Button } from '../components/common/Button';
-import HomeTab from '../components/home/HomeTab';
 import { useLocation } from 'react-router-dom';
 import { IoAddCircle, IoFilter, IoSearch, IoGrid, IoList } from 'react-icons/io5';
 import { useReports } from '../hooks/useReports';
@@ -227,8 +226,8 @@ const Reports: React.FC = () => {
     searchTerm, 
     setSearchTerm, 
     createReport, 
-    filteredComments, 
-    updateReportStatus 
+    updateReportStatus,
+    addComment 
   } = useReports();
 
   // 경로 변경 시 검색어 초기화
@@ -245,8 +244,6 @@ const Reports: React.FC = () => {
           새 보고서 작성
         </StyledButton>
       </Header>
-      
-      <HomeTab />
       
       <FilterBar>
         <SearchInput>
@@ -304,22 +301,9 @@ const Reports: React.FC = () => {
           <ModalContent onClick={e => e.stopPropagation()}>
             <ReportDetail
               report={selectedReport}
-              onStatusChange={(status: ReportStatus) => updateReportStatus(selectedReport.id, status)}
+              onStatusChange={(status: ReportStatus) => updateReportStatus(selectedReport.report_id, status)}
+              onCommentSubmit={(comment: string) => addComment(selectedReport.report_id, comment)}
             />
-            <CommentsSection>
-              {filteredComments.map((comment, index) => (
-                <CommentItem key={index}>
-                  <CommentHeader>
-                    <CommentAuthor>{comment.author_name || 'Anonymous'}</CommentAuthor>
-                    <CommentDate>{new Date(comment.created_at).toLocaleString()}</CommentDate>
-                  </CommentHeader>
-                  <CommentContent>{comment.content}</CommentContent>
-                </CommentItem>
-              ))}
-              {filteredComments.length === 0 && (
-                <NoComments>댓글이 없습니다</NoComments>
-              )}
-            </CommentsSection>
           </ModalContent>
         </Modal>
       )}

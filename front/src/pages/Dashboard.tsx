@@ -41,7 +41,7 @@ const SectionTitle = styled.h2`
 `;
 
 const Dashboard: React.FC = () => {
-  const user = useAuthStore((state) => state.user);
+  const { rank, name, unitName } = useAuthStore();
   const navigate = useNavigate();
 
   const { data: reportStats, isLoading: isLoadingReportStats } = useQuery<ReportStatistics>({
@@ -72,7 +72,7 @@ const Dashboard: React.FC = () => {
   });
 
   const handleReportClick = (report: Report) => {
-    navigate(`/reports/${report.id}`);
+    navigate(`/reports/${report.report_id}`);
   };
 
   if (isLoadingReportStats || isLoadingUnitStats || isLoadingReports) {
@@ -82,10 +82,9 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardContainer>
       <Header>
-        <Title>{user?.name}님의 대시보드</Title>
-        <Subtitle>
-          {user?.role === 'OFFICER' ? '부대 현황 및 보고서 관리' : '나의 보고서 현황'}
-        </Subtitle>
+        <Title>이름 왜 안보임? {name}님의 대시보드</Title>
+        <h3>{rank} {unitName}</h3>
+        <Subtitle>나의 보고서 목록</Subtitle>
       </Header>
 
       {reportStats && unitStats && (
@@ -97,19 +96,15 @@ const Dashboard: React.FC = () => {
             />
           </Section>
 
-          {user?.role === 'OFFICER' && (
-            <Section>
-              <SectionTitle>보고서 통계</SectionTitle>
-              <DashboardCharts statistics={reportStats} />
-            </Section>
-          )}
+          <Section>
+            <SectionTitle>보고서 통계</SectionTitle>
+            <DashboardCharts statistics={reportStats} />
+          </Section>
         </>
       )}
 
       <Section>
-        <SectionTitle>
-          {user?.role === 'OFFICER' ? '처리가 필요한 보고서' : '내 보고서 현황'}
-        </SectionTitle>
+        <SectionTitle>내 보고서 현황</SectionTitle>
         {recentReports && (
           <ReportList
             reports={recentReports}

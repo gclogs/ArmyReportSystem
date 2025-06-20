@@ -196,7 +196,6 @@ const Register: React.FC = () => {
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   
-  // Get the rank options directly from the RankSchema enum
   const rankOptions = Object.values(RankSchema.enum);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -321,7 +320,7 @@ const Register: React.FC = () => {
                 <option value="">선택해주세요</option>
                 {rankOptions.map(rank => (
                   <option key={rank} value={rank}>
-                    {getRankDisplayName(rank)}
+                    {rank}
                   </option>
                 ))}
               </Select>
@@ -377,27 +376,5 @@ const Register: React.FC = () => {
     </Container>
   );
 };
-
-// Helper function to display rank names in Korean
-function getRankDisplayName(rank: string): string {
-  const rankMap: Record<string, string> = {
-    'PVT': '이등병',
-    'PFC': '일병',
-    'CPL': '상병',
-    'SGT': '병장',
-    'SSG': '하사',
-    'SFC': '중사',
-    'MSG': '상사',
-    'SGM': '원사',
-    'LT': '소위',
-    'CPT': '중위',
-    'MAJ': '대위',
-    'LTC': '소령',
-    'COL': '중령',
-    'BG': '대령',
-  };
-  
-  return rankMap[rank] || rank;
-}
 
 export default Register;
