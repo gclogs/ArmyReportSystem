@@ -1,6 +1,8 @@
 package com.gclogs.armyreportsystem.service;
 
+import com.gclogs.armyreportsystem.domain.User;
 import com.gclogs.armyreportsystem.dto.TokenResponse;
+import com.gclogs.armyreportsystem.mapper.UserMapper;
 import com.gclogs.armyreportsystem.security.jwt.JwtTokenProvider;
 import com.gclogs.armyreportsystem.mapper.TokenMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,14 +15,28 @@ public class TokenService {
     private final TokenMapper tokenMapper;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final UserMapper userMapper;
+
     @Transactional
     public TokenResponse createTokens(String userId) {
+        User user = userMapper.findByUserId(userId);
+
+        if (user == null) {
+            return TokenResponse.builder()
+                    .success(false)
+                    .message("사용자 정보를 찾을 수 없습니다.")
+                    .build();
+        }
+
         String accessToken = jwtTokenProvider.createAccessToken(userId);
         String refreshToken = jwtTokenProvider.createRefreshToken(userId);
         tokenMapper.saveRefreshToken(userId, refreshToken);
 
         return TokenResponse.builder()
                 .user_id(userId)
+                .name(user.getName())
+                .rank(user.getRank())
+                .unit_name(user.getUnit_name())
                 .access_token(accessToken)
                 .refresh_token(refreshToken)
                 .token_type("Bearer")
