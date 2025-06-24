@@ -1,5 +1,5 @@
 # 빌드 스테이지
-FROM gradle:8.3-jdk17 AS build
+FROM gradle:8.3-jdk21 AS build
 WORKDIR /app
 COPY . /app/
 RUN gradle build -x test --no-daemon
