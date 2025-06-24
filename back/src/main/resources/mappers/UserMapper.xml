@@ -13,15 +13,15 @@
 
     <select id="findByUserId" resultType="com.gclogs.armyreportsystem.domain.User">
         SELECT 
-            user_id as user_id,
+            user_id,
             password,
             rank,
             role,
             name,
-            unit_name as unit_name,
-            phone_number as phone_number,
+            unit_name,
+            phone_number,
             email,
-            DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') as created_at,
+            created_at,
             status
         FROM user 
         WHERE user_id = #{user_id}
