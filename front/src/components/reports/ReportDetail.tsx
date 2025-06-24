@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Report, ReportStatus } from '../../schemas/report';
 import { Button } from '../common/Button';
+import useCommentStore from '../../stores/commentStore';
+import useAuthStore from '../../stores/authStore';
+import { useSearchParams } from 'react-router-dom';
 
 const PageContainer = styled.div`
   max-width: 900px;
@@ -164,10 +167,10 @@ const CommentContent = styled.p`
   line-height: 1.5;
 `;
 
-const CommentForm = styled.form`
+const CommentEditForm = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-bottom: 6px;
 `;
 
 const CommentInput = styled.input`
@@ -188,6 +191,26 @@ const CommentInput = styled.input`
   
   &::placeholder {
     color: #aaa;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const ActionButton = styled.button`
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #e8e8e8;
+    transform: translateY(-1px);
   }
 `;
 
@@ -220,6 +243,12 @@ const StatusBadge = styled.span<{ status: ReportStatus }>`
         return 'background-color: #f5f5f5; color: #616161;';
     }
   }}
+`;
+
+const CommentForm = styled.form`
+  display: flex;
+  gap: 10px;
+  margin-bottom: 6px;
 `;
 
 const PriorityBadge = styled.span<{ priority: string }>`
@@ -270,14 +299,114 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
   onCommentSubmit,
 }) => {
   const [comment, setComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editedContent, setEditedContent] = useState('');
+  const { 
+    comments, 
+    isLoading, 
+    error, 
+    fetchComments, 
+    addComment,
+    deleteComment,
+    updateComment 
+  } = useCommentStore();
+  const { userId } = useAuthStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  useEffect(() => {
+    if (report?.report_id) {
+      fetchComments(report.report_id);
+      
+      // 쿼리 파라미터에서 commentId가 있으면 해당 댓글로 스크롤
+      const commentIdFromUrl = searchParams.get('commentId');
+      if (commentIdFromUrl) {
+        setTimeout(() => {
+          const commentElement = document.getElementById(`comment-${commentIdFromUrl}`);
+          if (commentElement) {
+            commentElement.scrollIntoView({ behavior: 'smooth' });
+            commentElement.classList.add('highlighted');
+            setTimeout(() => commentElement.classList.remove('highlighted'), 3000);
+          }
+        }, 500); // 댓글 로딩 후 스크롤하기 위한 지연
+      }
+    }
+  }, [report?.report_id, fetchComments, searchParams]);
+  
+  const reportComments = Array.isArray(comments) 
+    ? comments.filter((comment) => comment.report_id === report?.report_id) 
+    : [];
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (comment.trim() && onCommentSubmit) {
-      onCommentSubmit(comment.trim());
+    if (!comment.trim()) return;
+    
+    try {
+      const newComment = await addComment(report.report_id, comment);
+      
+      if (onCommentSubmit) {
+        onCommentSubmit(comment);
+      }
+      
+      // 새 댓글로 URL 업데이트하고 스크롤
+      if (newComment && newComment.comment_id) {
+        setSearchParams({ commentId: newComment.comment_id.toString() });
+      }
+      
+      // 입력 필드 초기화
       setComment('');
+    } catch (error) {
+      console.error('댓글 작성 실패:', error);
     }
+  };
+
+  const handleCommentDelete = async (commentId: number) => {
+    try {
+      await deleteComment(commentId);
+      
+      // 댓글 삭제 후 URL에서 commentId 제거
+      if (searchParams.get('commentId') === commentId.toString()) {
+        searchParams.delete('commentId');
+        setSearchParams(searchParams);
+      }
+    } catch (error) {
+      console.error('댓글 삭제 실패:', error);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editingCommentId || !editedContent.trim()) return;
+
+    try {
+      const updatedComment = await updateComment(editingCommentId, editedContent);
+      
+      // 쿼리 파라미터 업데이트
+      if (updatedComment) {
+        setSearchParams({ commentId: editingCommentId.toString() });
+      }
+      
+      setEditingCommentId(null);
+      setEditedContent('');
+    } catch (error) {
+      console.error('댓글 수정 실패:', error);
+    }
+  };
+
+  const handleEditStart = (comment: any) => {
+    setEditingCommentId(parseInt(comment.comment_id));
+    setEditedContent(comment.content);
+    
+    // 편집 시작할 때 URL 업데이트
+    setSearchParams({ commentId: comment.comment_id.toString(), action: 'edit' });
+  };
+
+  const handleEditCancel = () => {
+    setEditingCommentId(null);
+    setEditedContent('');
+    
+    // 편집 취소 시 action 파라미터만 제거
+    searchParams.delete('action');
+    setSearchParams(searchParams);
   };
 
   return (
@@ -390,18 +519,66 @@ const ReportDetail: React.FC<ReportDetailProps> = ({
             작성
           </Button>
         </CommentForm>
+        {isLoading && <div>댓글을 불러오는 중...</div>}
+        {error && <div style={{ color: 'red' }}>{error}</div>}
         <CommentList>
-          {report.comments?.map((comment) => (
-            <CommentItem key={comment.comment_id}>
-              <CommentHeader>
-                <CommentAuthor>{comment.author_name}</CommentAuthor>
-                <CommentDate>
-                  {new Date(comment.created_at).toLocaleString()}
-                </CommentDate>
-              </CommentHeader>
-              <CommentContent>{comment.content}</CommentContent>
-            </CommentItem>
-          ))}
+          {reportComments.length === 0 && !isLoading ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#888' }}>
+              댓글이 없습니다. 첫 댓글을 작성해보세요!
+            </div>
+          ) : (
+            reportComments.map((comment, index) => (
+              <CommentItem 
+                key={comment.comment_id ? `comment-${comment.comment_id}` : `temp-comment-${index}`} 
+                id={`comment-${comment.comment_id || index}`}
+                className={searchParams.get('comment_id') === String(comment.comment_id || '') ? 'highlighted-comment' : ''}
+              >
+                <CommentHeader>
+                  <CommentAuthor>{comment.author_name}</CommentAuthor>
+                  <CommentDate>
+                    {new Date(comment.created_at).toLocaleString()}
+                  </CommentDate>
+                </CommentHeader>
+                
+                {editingCommentId === comment.comment_id ? (
+                  <CommentEditForm>
+                    <CommentInput
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                    />
+                    <ButtonGroup>
+                      <ActionButton type="button" onClick={handleEditSave}>
+                        저장
+                      </ActionButton>
+                      <ActionButton type="button" onClick={handleEditCancel}>
+                        취소
+                      </ActionButton>
+                    </ButtonGroup>
+                  </CommentEditForm>
+                ) : (
+                  <>
+                    <CommentContent>{comment.content}</CommentContent>
+                    {userId === comment.author_id && (
+                      <ButtonGroup>
+                        <ActionButton 
+                          type="button" 
+                          onClick={() => handleEditStart(comment)}
+                        >
+                          수정
+                        </ActionButton>
+                        <ActionButton 
+                          type="button" 
+                          onClick={() => handleCommentDelete(comment.comment_id)}
+                        >
+                          삭제
+                        </ActionButton>
+                      </ButtonGroup>
+                    )}
+                  </>
+                )}
+              </CommentItem>
+            ))
+          )}
         </CommentList>
       </CommentSection>
     </Container>
