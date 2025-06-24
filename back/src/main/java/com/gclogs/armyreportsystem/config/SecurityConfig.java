@@ -71,8 +71,7 @@ public class SecurityConfig {
             "Accept", 
             "Origin", 
             "Access-Control-Request-Method", 
-            "Access-Control-Request-Headers",
-            "userId"
+            "Access-Control-Request-Headers"
         ));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
