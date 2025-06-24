@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { ReportForm } from '../components/reports/ReportForm';
 import { ReportList } from '../components/reports/ReportList';
-import { ReportDetail } from '../components/reports/ReportDetail';
 import { Button } from '../components/common/Button';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { IoAddCircle, IoFilter, IoSearch, IoGrid, IoList } from 'react-icons/io5';
 import { useReports } from '../hooks/useReports';
-import { ReportStatus } from '../schemas/report';
+import { Report } from '../schemas/report';
 
 // 군대 테마에 맞는 색상 정의
 const colors = {
@@ -103,53 +101,6 @@ const ButtonsContainer = styled.div`
   gap: 8px;
 `;
 
-// 댓글 섹션 스타일 컴포넌트
-const CommentsSection = styled.div`
-  margin-top: 24px;
-  border-top: 1px solid ${colors.border};
-  padding-top: 16px;
-`;
-
-const CommentItem = styled.div`
-  background-color: ${colors.background};
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-`;
-
-const CommentHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-`;
-
-const CommentAuthor = styled.span`
-  font-weight: 500;
-  color: ${colors.primary};
-  font-size: 14px;
-`;
-
-const CommentDate = styled.span`
-  font-size: 12px;
-  color: ${colors.textLight};
-`;
-
-const CommentContent = styled.p`
-  margin: 0;
-  color: ${colors.text};
-  font-size: 14px;
-  line-height: 1.5;
-`;
-
-const NoComments = styled.div`
-  text-align: center;
-  padding: 16px;
-  color: ${colors.textLight};
-  font-style: italic;
-`;
-
 const IconButton = styled.button`
   display: flex;
   align-items: center;
@@ -175,59 +126,14 @@ const IconButton = styled.button`
   }
 `;
 
-const StyledButton = styled(Button)`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: ${colors.accent};
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background-color: ${colors.primary};
-  }
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-`;
-
 const Reports: React.FC = () => {
   const location = useLocation();
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const navigate = useNavigate();
   const [isGridView, setIsGridView] = useState(false);
   const {
-    selectedReport,
-    setSelectedReport,
     filteredReports, 
     searchTerm, 
-    setSearchTerm, 
-    createReport, 
-    updateReportStatus,
-    addComment 
+    setSearchTerm
   } = useReports();
 
   // 경로 변경 시 검색어 초기화
@@ -235,14 +141,14 @@ const Reports: React.FC = () => {
     setSearchTerm('');
   }, [location.pathname]);
   
+  const handleReportClick = (report: Report) => {
+    navigate(`/reports/${report.report_id}`);
+  };
+  
   return (
     <Container>
       <Header>
         <Title>군대 보고서 시스템</Title>
-        <StyledButton onClick={() => setIsFormOpen(true)}>
-          <IoAddCircle size={18} />
-          새 보고서 작성
-        </StyledButton>
       </Header>
       
       <FilterBar>
@@ -280,33 +186,9 @@ const Reports: React.FC = () => {
       <Content>
         <ReportList
           reports={filteredReports}
-          onReportClick={setSelectedReport}
+          onReportClick={handleReportClick}
         />
       </Content>
-
-      {isFormOpen && (
-        <Modal onClick={() => setIsFormOpen(false)}>
-          <ModalContent onClick={e => e.stopPropagation()}>
-            <ReportForm
-              onSubmit={createReport}
-              isLoading={false}
-              onSuccess={() => setIsFormOpen(false)}
-            />
-          </ModalContent>
-        </Modal>
-      )}
-
-      {selectedReport && (
-        <Modal onClick={() => setSelectedReport(null)}>
-          <ModalContent onClick={e => e.stopPropagation()}>
-            <ReportDetail
-              report={selectedReport}
-              onStatusChange={(status: ReportStatus) => updateReportStatus(selectedReport.report_id, status)}
-              onCommentSubmit={(comment: string) => addComment(selectedReport.report_id, comment)}
-            />
-          </ModalContent>
-        </Modal>
-      )}
     </Container>
   );
 };

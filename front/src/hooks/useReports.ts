@@ -1,13 +1,13 @@
 // src/hooks/useReports.ts
-import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiClient } from '../lib/client';
 import { Report, ReportStatus } from '../schemas/report';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 import { getCookie } from '../lib/cookies';
+import { useState } from 'react';
 
-export const useReports = (selectedReportId?: string) => {
+export const useReports = () => {
   const { userId } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();

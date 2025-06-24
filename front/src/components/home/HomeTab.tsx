@@ -1,6 +1,8 @@
 import React from "react"
+import { IoAddCircle } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
+import { Button } from "../common/Button";
 
 // 군대 테마에 맞는 색상 정의
 const colors = {
@@ -10,17 +12,21 @@ const colors = {
     highlight: '#F6BD60', // 군대 배지 색상 (금빛)
     background: '#F5F5F5', // 배경색
     text: '#333333', // 텍스트 색상
-    textLight: '#6E6E6E' // 밝은 텍스트 색상
+    textLight: '#6E6E6E', // 밝은 텍스트 색상
+    border: '#E0E0E0' // 테두리 색상
 };
 
-const Wrapper = styled.nav`
+const Wrapper = styled.div`
     display: flex;
-    padding: 0 20px;
-    height: 64px;
-    width: 100%;
-    background: ${colors.background};
+    align-items: center;
+    padding: 8px 12px;
+    background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
+    justify-content: space-between;
+`
+
+const TabsContainer = styled.div`
+    display: flex;
     align-items: center;
 `
 
@@ -72,20 +78,23 @@ const TabLink = styled.button<{ $isActive: boolean }>`
     `}
 `
 
-const BadgeCount = styled.span<{ type?: 'important' | 'new' }>`
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: ${props => props.type === 'important' ? colors.highlight : props.type === 'new' ? colors.accent : colors.secondary};
-    color: white;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 2px 8px;
-    margin-left: 6px;
-    min-width: 20px;
-    height: 20px;
-`
+const StyledButton = styled(Button)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: ${colors.accent};
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-left: auto;
+  
+  &:hover {
+    background-color: ${colors.primary};
+  }
+`;
 
 const HomeTab: React.FC = () => {
     const navigate = useNavigate();
@@ -96,21 +105,28 @@ const HomeTab: React.FC = () => {
     }
     
     const tabs = [
-        { path: '/reports/recommended', label: '필독' },
-        { path: '/reports/recent', label: '최신' },
-        { path: '/', label: '내 보고서' },
+        { label: '대시보드', path: '/' },
+        { label: '보고서', path: '/reports' },
+        { label: '승인', path: '/approvals' },
     ];
 
     return (
         <Wrapper>
-            {tabs.map((tab) => (
-                <TabLink
-                    key={tab.path}
-                    $isActive={location.pathname === tab.path}
-                    onClick={() => handleTabClick(tab.path)}>
-                    {tab.label}
-                </TabLink>
-            ))}
+            <TabsContainer>
+                {tabs.map((tab, index) => (
+                    <TabLink 
+                        key={index}
+                        $isActive={location.pathname === tab.path}
+                        onClick={() => handleTabClick(tab.path)}
+                    >
+                        {tab.label}
+                    </TabLink>
+                ))}
+            </TabsContainer>
+            <StyledButton onClick={() => navigate('/reports/write')}>
+                <IoAddCircle size={18} />
+                새 보고서 작성
+            </StyledButton>
         </Wrapper>
     );
 }

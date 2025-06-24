@@ -149,15 +149,15 @@ const Approvals: React.FC = () => {
   const { mutate: approveReport } = useApproveReport();
   const { mutate: rejectReport } = useRejectReport();
 
-  const handleApprove = (reportId: string) => {
+  const handleApprove = (reportId: number) => {
     approveReport({ id: reportId });
   };
 
-  const handleReject = (reportId: string) => {
+  const handleReject = (reportId: number) => {
     rejectReport({ id: reportId, reason: '반려 사유' }); // TODO: Add rejection reason input
   };
 
-  const handleViewDetails = (reportId: string) => {
+  const handleViewDetails = (reportId: number) => {
     console.log('View details:', reportId);
   };
 
