@@ -257,4 +257,30 @@ public class ReportService {
                 .deleted_at(report.getDeleted_at())
                 .build();
     }
+
+    @Transactional
+    public ReportResponse isAuthorizedReport(Long reportId, String userId) {
+        Report report = reportMapper.findReportById(reportId);
+        if (report == null) {
+            throw new IllegalArgumentException("보고서를 찾을 수 없습니다.");
+        }
+
+        User user = userMapper.findByUserId(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+
+        boolean isAuthorized = reportMapper.isAuthorizedReport(reportId, userId);
+        if (!isAuthorized) {
+            return ReportResponse.builder()
+                    .success(false)
+                    .message("보고서에 대한 접근 권한이 없습니다.")
+                    .build();
+        }
+
+        return ReportResponse.builder()
+                .success(true)
+                .message("보고서에 접근 권한이 있습니다.")
+                .build();
+    }
 }

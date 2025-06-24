@@ -50,7 +50,7 @@
     </select>
     
     <!-- 보고서 작성 -->
-    <insert id="writeReport" parameterType="com.gclogs.armyreportsystem.domain.Report" useGeneratedKeys="true" keyProperty="reportId">
+    <insert id="writeReport" parameterType="com.gclogs.armyreportsystem.domain.Report" useGeneratedKeys="true" keyProperty="report_id">
         INSERT INTO reports (
             author_id, 
             author_name, 
@@ -78,7 +78,7 @@
         )
         
         <!-- 보안 강화: 액세스 로그 기록 -->
-        <selectKey resultType="long" keyProperty="reportId" order="AFTER">
+        <selectKey resultType="long" keyProperty="report_id" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
     </insert>
@@ -125,7 +125,7 @@
             ip_address,
             user_agent
         ) VALUES (
-            #{reportId},
+            #{report_id},
             #{userId},
             #{accessType},
             NOW(),
@@ -142,7 +142,7 @@
             action_time,
             user_id
         ) VALUES (
-            #{reportId},
+            #{report_id},
             #{action},
             NOW(),
             #{userId}
@@ -150,7 +150,7 @@
     </insert>
     
     <!-- 보안 강화: 암호화된 보고서 내용 저장 (민감한 보고서의 경우) -->
-    <insert id="writeEncryptedReport" parameterType="com.gclogs.armyreportsystem.domain.Report" useGeneratedKeys="true" keyProperty="reportId">
+    <insert id="writeEncryptedReport" parameterType="com.gclogs.armyreportsystem.domain.Report" useGeneratedKeys="true" keyProperty="report_id">
         INSERT INTO reports (
             author_id, 
             author_name, 
@@ -198,5 +198,15 @@
             reports r
         WHERE 
             r.report_id = #{report_id}
+    </select>
+
+    <!-- 보고서를 작성한 유저가 맞는지 확인 -->
+    <select id="isAuthorizedReport" parameterType="com.gclogs.armyreportsystem.domain.Report" resultType="boolean">
+        SELECT
+            author_id = #{author_id}
+        FROM
+            reports
+        WHERE
+            report_id = #{report_id}
     </select>
 </mapper>

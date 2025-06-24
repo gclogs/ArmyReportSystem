@@ -14,5 +14,6 @@ public interface ReportMapper {
     void writeReport(Report report);
     void editReport(Report report);
     void deleteReport(Report report);
-    void writeEncryptedReport(Report report); 
+    void writeEncryptedReport(Report report);
+    boolean isAuthorizedReport(@Param("report_id") Long reportId, @Param("user_id") String userId);
 }

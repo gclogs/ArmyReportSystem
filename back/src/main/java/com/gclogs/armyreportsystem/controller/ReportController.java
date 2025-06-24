@@ -5,6 +5,8 @@ import com.gclogs.armyreportsystem.dto.ReportRequest;
 import com.gclogs.armyreportsystem.dto.ReportResponse;
 import com.gclogs.armyreportsystem.service.CommentService;
 import com.gclogs.armyreportsystem.service.ReportService;
+import com.gclogs.armyreportsystem.service.TokenService;
+import com.gclogs.armyreportsystem.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReportController {
 
+    private final TokenService tokenService;
     private final ReportService reportService;
-    private final CommentService commentService;
 
     @GetMapping("/list")
     public ResponseEntity<List<ReportResponse>> getReportList() {
@@ -43,19 +45,13 @@ public class ReportController {
         @RequestParam(value = "type", required = false) String type,
         @RequestParam(value = "priority", required = false) String priority,
         @RequestParam(value = "attachments", required = false) List<MultipartFile> attachments,
-        @RequestHeader(value = "userId", required = true) String userId) {
+        @RequestHeader(value = "Authorization", required = true) String header) {
         
-        log.debug("Multipart 보고서 생성 요청 - userId: {}", userId);
-        
-        if (userId == null || userId.isEmpty()) {
-            return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ReportResponse.builder()
-                    .success(false)
-                    .message("사용자 ID가 필요합니다")
-                    .build());
-        }
-            
+        log.debug("Multipart 보고서 생성 요청 - token: {}", header);
+
+        String token = header.replace("Bearer ", "");
+        String userId = tokenService.getUserIdFromToken(token);
+
         ReportRequest request = new ReportRequest();
         request.setTitle(title);
         request.setContent(content);
@@ -74,11 +70,23 @@ public class ReportController {
         }
         return ResponseEntity.ok(response);
     }
-    
+
     @PutMapping("/{reportId}")
     public ResponseEntity<ReportResponse> updateReport(
             @PathVariable Long reportId,
+            @RequestHeader(value = "Authorization", required = true) String header,
             @Valid @RequestBody ReportRequest request) {
+
+        String token = header.replace("Bearer ", "");
+        String userId = tokenService.getUserIdFromToken(token);
+
+        // 권한 확인
+        ReportResponse authorizedReport = reportService.isAuthorizedReport(reportId, userId);
+        if(!authorizedReport.isSuccess()) {
+            return  ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // 권한이 없으면 보고서 수정 진행
         ReportResponse response = reportService.editReport(reportId, request);
         if (!response.isSuccess()) {
             return ResponseEntity.badRequest().body(response);
@@ -87,7 +95,20 @@ public class ReportController {
     }
     
     @DeleteMapping("/{reportId}")
-    public ResponseEntity<ReportResponse> deleteReport(@PathVariable Long reportId) {
+    public ResponseEntity<ReportResponse> deleteReport(
+            @PathVariable Long reportId,
+            @RequestHeader(value = "Authorization", required = true) String header) {
+        
+        String token = header.replace("Bearer ", "");
+        String userId = tokenService.getUserIdFromToken(token);
+
+        // 권한 확인
+        ReportResponse authorizedReport = reportService.isAuthorizedReport(reportId, userId);
+        if(!authorizedReport.isSuccess()) {
+            return  ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // 권한이 없으면 보고서 삭제 진행
         ReportResponse response = reportService.deleteReportById(reportId);
         if (!response.isSuccess()) {
             return ResponseEntity.badRequest().body(response);
