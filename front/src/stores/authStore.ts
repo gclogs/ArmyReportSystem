@@ -44,7 +44,7 @@ const useAuthStore = create<AuthState>()(
                     const response = await login(userId, password);
                     
                     // 토큰 쿠키에 저장
-                    const { access_token, user_id, name, unit_name, email, rank } = response;
+                    const { access_token, user_id, name, unit_name, rank } = response;
                     get().setAccessToken(access_token);
                     
                     // 사용자 인증 상태 설정

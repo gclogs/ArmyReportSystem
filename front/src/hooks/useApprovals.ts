@@ -9,7 +9,7 @@ async function fetchPendingReports(): Promise<Report[]> {
   return response.json();
 }
 
-async function approveReport(data: { id: string; comment?: string }): Promise<Report> {
+async function approveReport(data: { id: number; comment?: string }): Promise<Report> {
   const response = await fetch(`${API_BASE_URL}/reports/${data.id}/approve`, {
     method: 'POST',
     headers: {
@@ -21,7 +21,7 @@ async function approveReport(data: { id: string; comment?: string }): Promise<Re
   return response.json();
 }
 
-async function rejectReport(data: { id: string; reason: string }): Promise<Report> {
+async function rejectReport(data: { id: number; reason: string }): Promise<Report> {
   const response = await fetch(`${API_BASE_URL}/reports/${data.id}/reject`, {
     method: 'POST',
     headers: {

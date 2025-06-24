@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import NotificationBell from './NotificationBell';
 import { useNavigate } from 'react-router-dom';
 import { FaBars } from "react-icons/fa6";
 import { FaSearch } from 'react-icons/fa';
@@ -134,6 +133,12 @@ const Header: React.FC = () => {
     navigate(path);
     setMenuOpen(false);
   };
+
+  const handleLogoutClick = async () => {
+    await logout();
+    navigate('/login');
+    setMenuOpen(false);
+  };
   
   // Close the menu when clicking outside
   useEffect(() => {
@@ -166,7 +171,7 @@ const Header: React.FC = () => {
             <DropdownMenu isOpen={menuOpen}>
               <DropdownItem onClick={() => handleMenuItemClick('/profile')}>프로필</DropdownItem>
               <DropdownItem onClick={() => handleMenuItemClick('/settings')}>설정</DropdownItem>
-              <DropdownItem onClick={() => logout()}>로그아웃</DropdownItem>
+              <DropdownItem onClick={handleLogoutClick}>로그아웃</DropdownItem>
             </DropdownMenu>
           </MenuContainer>
         </IconsContainer>

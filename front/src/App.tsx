@@ -10,6 +10,8 @@ import Register from './pages/Register';
 import GlobalStyle from './GlobalStyle';
 import './App.css'
 import { getCookie } from './lib/cookies';
+import ReportDetailPage from './pages/ReportDetailPage';
+import ReportWritePage from './pages/ReportWritePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,7 +64,8 @@ function App() {
           }>
             <Route index element={<Dashboard />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="reports/:id" element={<Reports />} />
+            <Route path="reports/:id" element={<ReportDetailPage />} />
+            <Route path="reports/write" element={<ReportWritePage />} />
             <Route path="reports/recommend" element={<Reports />} />
             <Route path="reports/recent" element={<Reports />} />
             <Route path="approvals" element={<Approvals />} />
