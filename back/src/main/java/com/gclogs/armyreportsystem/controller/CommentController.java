@@ -1,56 +1,68 @@
 // com.gclogs.armyreportsystem.controller.CommentController.java
 package com.gclogs.armyreportsystem.controller;
 
-import com.gclogs.armyreportsystem.domain.Comment;
 import com.gclogs.armyreportsystem.dto.CommentRequest;
 import com.gclogs.armyreportsystem.dto.CommentResponse;
 import com.gclogs.armyreportsystem.service.CommentService;
-import jakarta.validation.Valid;
+import com.gclogs.armyreportsystem.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/api/comments")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
+    private final TokenService tokenService;
 
-    @GetMapping("/{reportId}/comments")
-    public ResponseEntity<?> getCommentsByReportId(@PathVariable("reportId") Long reportId) {
+    @GetMapping
+    public ResponseEntity<?> getCommentsByReportId(@RequestParam("reportId") Long reportId) {
         var comments = commentService.getCommentsByReportId(reportId);
-
-        Map<String, List<CommentResponse>> response = new HashMap<>();
-        response.put("data", comments);
-        return ResponseEntity.ok(response);
+        
+        // is_deleted가 false인 댓글만 필터링
+        var nonDeletedComments = comments.stream()
+                .filter(comment -> !comment.is_deleted())
+                .collect(Collectors.toList());
+                
+        return ResponseEntity.ok(nonDeletedComments);
     }
 
-    @PostMapping("/{reportId}/comments")
+    @PostMapping
     public ResponseEntity<CommentResponse> createComment(
-            @PathVariable("reportId") Long reportId,
-            @Valid @RequestHeader("userId") String userId,
+            @RequestHeader("Authorization") String header,
             @RequestBody CommentRequest request) {
-        return ResponseEntity.ok(commentService.createComment(reportId, userId, request));
+
+        String token = header.replace("Bearer ", "");
+        String userId = tokenService.getUserIdFromToken(token);
+
+        return ResponseEntity.ok(commentService.createComment(userId, request));
     }
 
-    @PutMapping("/{reportId}/comments/{commentId}")
+    @PutMapping("/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable("commentId") Long commentId,
-            @RequestHeader("userId") String userId,
+            @RequestHeader("Authorization") String header,
             @RequestBody CommentRequest request) {
+
+        String token = header.replace("Bearer ", "");
+        String userId = tokenService.getUserIdFromToken(token);
+        System.out.print("User ID: " + userId);
+
         return ResponseEntity.ok(commentService.updateComment(commentId, userId, request));
     }
 
-    @DeleteMapping("/{reportId}/comments/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<CommentResponse> deleteComment(
-            @PathVariable("reportId") Long reportId,
             @PathVariable("commentId") Long commentId,
-            @RequestHeader("userId") String userId) {
+            @RequestHeader("Authorization") String header) {
+
+        String token = header.replace("Bearer ", "");
+        String userId = tokenService.getUserIdFromToken(token);
+
         return ResponseEntity.ok(commentService.deleteComment(commentId, userId));
     }
 }

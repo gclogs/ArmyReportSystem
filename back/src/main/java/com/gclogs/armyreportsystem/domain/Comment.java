@@ -17,6 +17,7 @@ public class Comment {
     private Long report_id;        // 댓글이 달린 보고서 ID
     private String author_id;      // 작성자 ID
     private String author_name;    // 작성자 이름
+    private String author_rank;
     private String content;       // 댓글 내용
     private LocalDateTime created_at;
     private LocalDateTime updated_at;

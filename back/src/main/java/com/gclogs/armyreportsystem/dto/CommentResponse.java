@@ -16,6 +16,7 @@ public class CommentResponse {
     private Long report_id;
     private String author_id;
     private String author_name;
+    private String author_rank;
     private String content;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
