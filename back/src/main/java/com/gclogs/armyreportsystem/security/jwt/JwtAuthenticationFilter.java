@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             
             if (jwtTokenProvider.validateToken(token)) {
                 // Claims에서 user_id를 문자열로 추출
-                Claims claims = jwtTokenProvider.getUserIdFromToken(token);
+                Claims claims = jwtTokenProvider.getClaimsFromToken(token);
                 String userId = claims.get("user_id", String.class);
                 
                 // 사용자 ID를 principal로 설정
@@ -55,6 +55,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth/") || path.startsWith("/api/public/");
+        String method = request.getMethod();
+        
+        // OPTIONS 메서드는 preflight 요청이므로 필터링하지 않음
+        // /api/auth/와 /api/public/로 시작하는 경로도 필터링하지 않음
+        return "OPTIONS".equals(method) || 
+               path.startsWith("/api/auth/") || 
+               path.startsWith("/api/public/");
     }
 }

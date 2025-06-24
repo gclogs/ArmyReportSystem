@@ -67,7 +67,7 @@ public class JwtTokenProvider {
                 .setSubject(String.valueOf(userId))
                 .setIssuedAt(now)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .claim("userId", userId)
+                .claim("user_id", userId)
                 .setExpiration(accessExpiryDate)
                 .compact();
     }
@@ -78,14 +78,15 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + tokenValidityInSeconds * 1000);
         
         return Jwts.builder()
-                .claim("userId", userId)
+                .claim("user_id", userId)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
-    
-    public Claims getUserIdFromToken(String token) {
+
+    // 토큰에서 사용자 ID 추출
+    public Claims getClaimsFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .build()
