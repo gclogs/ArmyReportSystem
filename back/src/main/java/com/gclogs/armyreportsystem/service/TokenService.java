@@ -61,7 +61,7 @@ public class TokenService {
                         .build();
             }
 
-            String userId = jwtTokenProvider.getUserIdFromToken(refreshToken).get("user_id", String.class);
+            String userId = jwtTokenProvider.getClaimsFromToken(refreshToken).get("user_id", String.class);
             String newAccessToken = jwtTokenProvider.createAccessToken(userId);
 
             return TokenResponse.builder()
@@ -80,18 +80,9 @@ public class TokenService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public TokenResponse createAccessTokenOnly(String userId) {
-        String accessToken = jwtTokenProvider.createAccessToken(userId);
-        
-        return TokenResponse.builder()
-                .user_id(userId)
-                .access_token(accessToken)
-                .token_type("Bearer")
-                .access_token_expires_in(86400L) // 1일
-                .success(true)
-                .message("액세스 토큰이 생성되었습니다.")
-                .build();
+    @Transactional
+    public String getUserIdFromToken(String token) {
+        return jwtTokenProvider.getClaimsFromToken(token).get("user_id", String.class);
     }
 
     @Transactional
