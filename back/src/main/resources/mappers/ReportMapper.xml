@@ -73,8 +73,8 @@
             #{priority}, 
             #{status}, 
             #{is_deleted},
-            #{createdAt}, 
-            #{updatedAt}
+            #{created_at},
+            #{updated_at}
         )
         
         <!-- 보안 강화: 액세스 로그 기록 -->
@@ -126,7 +126,7 @@
             user_agent
         ) VALUES (
             #{report_id},
-            #{userId},
+            #{user_id},
             #{accessType},
             NOW(),
             #{ipAddress},
@@ -145,35 +145,35 @@
             #{report_id},
             #{action},
             NOW(),
-            #{userId}
+            #{user_id}
         )
     </insert>
-    
+
     <!-- 보안 강화: 암호화된 보고서 내용 저장 (민감한 보고서의 경우) -->
     <insert id="writeEncryptedReport" parameterType="com.gclogs.armyreportsystem.domain.Report" useGeneratedKeys="true" keyProperty="report_id">
         INSERT INTO reports (
-            author_id, 
-            author_name, 
-            author_rank, 
-            type, 
-            title, 
-            content, 
-            priority, 
-            status, 
+            author_id,
+            author_name,
+            author_rank,
+            type,
+            title,
+            content,
+            priority,
+            status,
             is_deleted,
-            created_at, 
+            created_at,
             updated_at
         ) VALUES (
-            #{author_id}, 
-            #{author_name}, 
-            #{author_rank}, 
-            #{type}, 
-            #{title}, 
-            HEX(AES_ENCRYPT(#{content}, 'military_grade_encryption_key')), 
-            #{priority}, 
-            #{status}, 
+            #{author_id},
+            #{author_name},
+            #{author_rank},
+            #{type},
+            #{title},
+            HEX(AES_ENCRYPT(#{content}, 'military_grade_encryption_key')),
+            #{priority},
+            #{status},
             #{is_deleted},
-            #{created_at}, 
+            #{created_at},
             #{updated_at}
         )
     </insert>
