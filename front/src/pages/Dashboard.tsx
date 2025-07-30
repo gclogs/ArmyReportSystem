@@ -41,77 +41,15 @@ const SectionTitle = styled.h2`
 `;
 
 const Dashboard: React.FC = () => {
-  const { rank, name, unitName } = useAuthStore();
-  const navigate = useNavigate();
-
-  const { data: reportStats, isLoading: isLoadingReportStats } = useQuery<ReportStatistics>({
-    queryKey: ['reportStatistics'],
-    queryFn: async () => {
-      const response = await fetch('/api/statistics/reports');
-      if (!response.ok) throw new Error('통계 데이터 로드 실패');
-      return response.json();
-    },
-  });
-
-  const { data: unitStats, isLoading: isLoadingUnitStats } = useQuery<UnitStatistics>({
-    queryKey: ['unitStatistics'],
-    queryFn: async () => {
-      const response = await fetch('/api/statistics/unit');
-      if (!response.ok) throw new Error('부대 통계 로드 실패');
-      return response.json();
-    },
-  });
-
-  const { data: recentReports, isLoading: isLoadingReports } = useQuery({
-    queryKey: ['recentReports'],
-    queryFn: async () => {
-      const response = await fetch('/api/reports/recent');
-      if (!response.ok) throw new Error('최근 보고서 로드 실패');
-      return response.json();
-    },
-  });
-
-  const handleReportClick = (report: Report) => {
-    navigate(`/reports/${report.report_id}`);
-  };
-
-  if (isLoadingReportStats || isLoadingUnitStats || isLoadingReports) {
-    return <div>Loading...</div>;
-  }
+  const { user } = useAuthStore();
 
   return (
     <DashboardContainer>
       <Header>
-        <Title>이름 왜 안보임? {name}님의 대시보드</Title>
-        <h3>{rank} {unitName}</h3>
+        <Title>이름: {user?.name}님의 대시보드</Title>
+        <h3>{user?.rank} {user?.unitName}</h3>
         <Subtitle>나의 보고서 목록</Subtitle>
       </Header>
-
-      {reportStats && unitStats && (
-        <>
-          <Section>
-            <DashboardStats
-              reportStats={reportStats}
-              unitStats={unitStats}
-            />
-          </Section>
-
-          <Section>
-            <SectionTitle>보고서 통계</SectionTitle>
-            <DashboardCharts statistics={reportStats} />
-          </Section>
-        </>
-      )}
-
-      <Section>
-        <SectionTitle>내 보고서 현황</SectionTitle>
-        {recentReports && (
-          <ReportList
-            reports={recentReports}
-            onReportClick={handleReportClick}
-          />
-        )}
-      </Section>
     </DashboardContainer>
   );
 };

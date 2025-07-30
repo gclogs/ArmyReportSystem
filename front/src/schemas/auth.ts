@@ -1,46 +1,14 @@
 import { z } from 'zod';
 
-export const RoleSchema = z.enum(['SOLDIER', 'OFFICER', 'ADMIN']);
-export const RankSchema = z.enum([
-  // 병사 계급
-  '이등병',
-  '일병',
-  '상병',
-  '병장',
-  
-  // 부사관 계급
-  '하사',
-  '중사',
-  '상사',
-  '원사',
-  
-  // 장교 계급
-  '소위',
-  '중위',
-  '대위',
-  '소령',
-  '중령',
-  '대령',
-]);
-
-export const UnitSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  parentId: z.string().optional(),
-});
-
 export const UserSchema = z.object({
   id: z.string(),
-  username: z.string(),
-  role: RoleSchema,
-  rank: RankSchema,
-  name: z.string(),
   unitId: z.string(),
-  isApproved: z.boolean(),
+  unitName: z.string(),
+  name: z.string(),
+  role: z.number(),
+  rank: z.string(),
   phoneNumber: z.string().optional(),
-  email: z.string().email().optional(),
-  createdAt: z.string(),
-  lastLoginAt: z.string().optional(),
+  email: z.string().email().optional()
 });
 
 export const PermissionSchema = z.enum([
@@ -64,22 +32,20 @@ export const PermissionSchema = z.enum([
   'MANAGE_SYSTEM',
 ]);
 
-export const RolePermissionsSchema = z.record(RoleSchema, z.array(PermissionSchema));
-
 // 기본 권한 설정
-export const DEFAULT_PERMISSIONS: Record<z.infer<typeof RoleSchema>, z.infer<typeof PermissionSchema>[]> = {
-  SOLDIER: [
+export const DEFAULT_PERMISSIONS: Record<number, Permission[]> = {
+  1: [
     'CREATE_REPORT',
     'VIEW_REPORT',
   ],
-  OFFICER: [
+  2: [
     'CREATE_REPORT',
     'VIEW_REPORT',
     'EDIT_REPORT',
     'APPROVE_REPORT',
     'VIEW_USERS',
   ],
-  ADMIN: [
+  3: [
     'CREATE_REPORT',
     'VIEW_REPORT',
     'EDIT_REPORT',
@@ -94,9 +60,6 @@ export const DEFAULT_PERMISSIONS: Record<z.infer<typeof RoleSchema>, z.infer<typ
   ],
 };
 
-export type Role = z.infer<typeof RoleSchema>;
-export type Rank = z.infer<typeof RankSchema>;
-export type Unit = z.infer<typeof UnitSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type Permission = z.infer<typeof PermissionSchema>;
 

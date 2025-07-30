@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ReportDetail } from '../components/reports/ReportDetail';
-import useCommentStore from '../stores/commentStore';
+import { ReportDetail } from '../components/reports/comment/ReportContent';
 import styled from 'styled-components';
-import { Report, ReportStatus } from '../schemas/report';
+import { Report, ReportPriority, ReportStatus } from '../schemas/report';
 import { getApiClient } from '../lib/client';
 import { IoArrowBack } from 'react-icons/io5';
+import { useReports } from '../hooks/useReports';
 
 const PageContainer = styled.div`
   max-width: 900px;
@@ -45,7 +45,7 @@ const ReportDetailPage: React.FC = () => {
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { addComment, updateComment, deleteComment } = useCommentStore();
+  const { updateReport } = useReports()
   
   // 보고서 데이터 로드
   useEffect(() => {
@@ -66,38 +66,31 @@ const ReportDetailPage: React.FC = () => {
     
     fetchReport();
   }, [id]);
-  
-  // 보고서 상태 업데이트
-  const updateReportStatus = async (reportId: number, status: ReportStatus) => {
-    if (!report) return;
-    
-    try {
-      await getApiClient().put(`/reports/${reportId}/status`, { status });
-      
-      // 보고서 상태 업데이트 후 데이터 다시 로드
-      const response = await getApiClient().get(`/reports/${id}`);
-      setReport(response.data);
-    } catch (error) {
-      console.error('상태 업데이트 실패:', error);
-    }
-  };
-  
-  // 새로운 댓글 추가 처리
-  const handleCommentSubmit = async (content: string) => {
-    if (!report) return;
-    
-    try {
-      // addComment 함수를 직접 호출하고 결과를 기다림
-      await addComment(report.report_id, content);
-      
-      // 성공 후 추가 작업이 필요한 경우 여기에 코드 추가
-    } catch (error) {
-      console.error('댓글 추가 실패:', error);
-    }
-  };
-  
+
   const handleBack = () => {
     navigate('/reports');
+  };
+  
+  const handleStatusChange = async (status: ReportStatus) => {
+    if (!report) return;
+    const updatedReport = { ...report, status };
+    try {
+      await updateReport.mutateAsync(updatedReport);
+      setReport(updatedReport);
+    } catch (error) {
+      console.error('상태 변경 실패:', error);
+    }
+  };
+  
+  const handlePriorityChange = async (priority: ReportPriority) => {
+    if (!report) return;
+    const updatedReport = { ...report, priority };
+    try {
+      await updateReport.mutateAsync(updatedReport);
+      setReport(updatedReport);
+    } catch (error) {
+      console.error('우선순위 변경 실패:', error);
+    }
   };
   
   if (loading) {
@@ -131,8 +124,8 @@ const ReportDetailPage: React.FC = () => {
       </BackButton>
       <ReportDetail
         report={report}
-        onStatusChange={(status: ReportStatus) => updateReportStatus(report.report_id, status)}
-        onCommentSubmit={handleCommentSubmit}
+        onStatusChange={handleStatusChange}
+        onPriorityChange={handlePriorityChange}
       />
     </PageContainer>
   );

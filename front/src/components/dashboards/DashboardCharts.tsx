@@ -95,10 +95,10 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ statistics }) => {
           {Object.entries(statistics.byStatus).map(([status, count]) => (
             <BarGroup key={status}>
               <BarLabel>
-                {status === 'new' && '신규'}
-                {status === 'in_progress' && '진행중'}
-                {status === 'resolved' && '해결됨'}
-                {status === 'rejected' && '반려'}
+                {status === '신규' && '신규'}
+                {status === '진행중' && '진행중'}
+                {status === '해결됨' && '해결됨'}
+                {status === '반려' && '반려'}
               </BarLabel>
               <Bar
                 value={(count / totalByStatus) * 100}
@@ -116,10 +116,10 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ statistics }) => {
           {Object.entries(statistics.byPriority).map(([priority, count]) => (
             <BarGroup key={priority}>
               <BarLabel>
-                {priority === 'urgent' && '긴급'}
-                {priority === 'high' && '높음'}
-                {priority === 'medium' && '중간'}
-                {priority === 'low' && '낮음'}
+                {priority === '긴급' && '긴급'}
+                {priority === '높음' && '높음'}
+                {priority === '중간' && '중간'}
+                {priority === '낮음' && '낮음'}
               </BarLabel>
               <Bar
                 value={(count / totalByPriority) * 100}

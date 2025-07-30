@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ReportList } from '../components/reports/ReportList';
-import { Button } from '../components/common/Button';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IoAddCircle, IoFilter, IoSearch, IoGrid, IoList } from 'react-icons/io5';
+import { IoFilter, IoSearch, IoGrid, IoList } from 'react-icons/io5';
 import { useReports } from '../hooks/useReports';
 import { Report } from '../schemas/report';
 
@@ -142,7 +141,7 @@ const Reports: React.FC = () => {
   }, [location.pathname]);
   
   const handleReportClick = (report: Report) => {
-    navigate(`/reports/${report.report_id}`);
+    navigate(`/reports/${report.reportId}`);
   };
   
   return (
@@ -161,7 +160,7 @@ const Reports: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </SearchInput>
-        
+
         <ButtonsContainer>
           <IconButton 
             className={!isGridView ? 'active' : ''}

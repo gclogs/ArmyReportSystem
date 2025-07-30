@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-export const ReportStatusSchema = z.enum(['new', 'in_progress', 'resolved', 'rejected']);
-export const ReportPrioritySchema = z.enum(['low', 'medium', 'high', 'urgent']);
-export const ReportTypeSchema = z.enum(['normal', 'emergency', 'maintenance', 'incident']);
+export const ReportStatusSchema = z.enum(['신규', '진행중', '해결됨', '반려']);
+export const ReportPrioritySchema = z.enum(['낮음', '중간', '높음', '긴급']);
+export const ReportTypeSchema = z.enum(['일반', '긴급', '유지보수', '사고']);
 
 export type ReportStatus = z.infer<typeof ReportStatusSchema>;
 export type ReportPriority = z.infer<typeof ReportPrioritySchema>;
@@ -15,39 +15,28 @@ export const LocationSchema = z.object({
 });
 
 export const CommentSchema = z.object({
-  comment_id: z.number(),
-  report_id: z.number(),
-  author_id: z.string(),
-  author_name: z.string(),
+  commentId: z.number(),
+  reportId: z.number(),
+  authorId: z.string(),
+  authorName: z.string(),
   content: z.string(),
-  created_at: z.string(),
-});
-
-export const AttachmentSchema = z.object({
-  attachment_id: z.number(),
-  report_id: z.number(),
-  file_url: z.string(),
-  file_name: z.string(),
-  file_type: z.string(),
-  created_at: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export const ReportSchema = z.object({
-  report_id: z.number(),
+  reportId: z.number(),
   type: ReportTypeSchema,
   title: z.string().min(1, '제목을 입력해주세요'),
   content: z.string().min(1, '내용을 입력해주세요'),
   status: ReportStatusSchema,
   priority: ReportPrioritySchema,
   location: LocationSchema.optional(),
-  author_id: z.string(),
-  author_name: z.string(),
-  assignee_id: z.string().optional(),
-  assignee_name: z.string().optional(),
-  created_at: z.string(),
-  updated_at: z.string(),
-  resolved_at: z.string().optional(),
-  attachments: z.array(AttachmentSchema).optional(),
+  authorId: z.string(),
+  authorName: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  resolvedAt: z.string().optional(),
   comments: z.array(CommentSchema).optional(),
 });
 
@@ -57,11 +46,9 @@ export const ReportFormSchema = z.object({
   content: z.string().min(1, '내용을 입력해주세요'),
   priority: ReportPrioritySchema,
   location: LocationSchema.optional(),
-  attachments: z.array(z.instanceof(File)).optional(),
 });
 
 export type Report = z.infer<typeof ReportSchema>;
 export type ReportFormData = z.infer<typeof ReportFormSchema>;
 export type Location = z.infer<typeof LocationSchema>;
 export type Comment = z.infer<typeof CommentSchema>;
-export type Attachment = z.infer<typeof AttachmentSchema>;

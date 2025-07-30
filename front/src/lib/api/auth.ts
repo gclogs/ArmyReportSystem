@@ -1,26 +1,35 @@
 import { getApiClient } from '../client';
+import { deleteCookie, setCookie } from '../cookies';
 
 export interface AuthResponse {
-    user_id: string;
-    name: string;
-    unit_name: string;
+    accessToken: string;
+    accessTokenExpiresIn: number;
+    createdAt: string;
     email: string;
-    rank: string;
-    access_token: string;
-    refresh_token: string;
-    token_type: string;
-    access_token_expires_in: number;
-    refresh_token_expires_in: number;
-    success: boolean;
     message: string;
+    name: string;
+    phoneNumber: string;
+    rank: string;
+    refreshToken: string;
+    refreshTokenExpiresIn: number;
+    role: number;
+    success: boolean;
+    tokenType: string;
+    unitId: string;
+    unitName: string;
+    userId: string;
 }
 
 export async function login(userId: string, password: string): Promise<AuthResponse> {
     const response = await getApiClient().post('/auth/login', {
-        user_id: userId, 
+        userId: userId, 
         password
     });
-      
+
+    console.log(response.data);
+
+    setCookie('accessToken', response.data.accessToken, 1);
+    setCookie('refreshToken', response.data.refreshToken, 1);
     return response.data;
 }
 
@@ -34,12 +43,12 @@ export async function register(
     email?: string
 ) {
     const result = await getApiClient().post('/auth/register', {
-        user_id: userId,
+        userId: userId,
         password,
         name,
         rank,
-        unit_name: unitName,
-        phone_number: phoneNumber,
+        unitName: unitName,
+        phoneNumber,
         email,
     });
 
@@ -48,9 +57,11 @@ export async function register(
 
 export async function logout() {
     await getApiClient().post('/auth/logout');
+    deleteCookie('accessToken');
 }
 
 export async function refreshTokens(): Promise<AuthResponse> {
     const response = await getApiClient().post('/auth/refresh');
+    setCookie('refreshToken', response.data.refreshToken, 1);
     return response.data;
 }

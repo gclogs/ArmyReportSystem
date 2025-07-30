@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { z } from 'zod';
-import { RankSchema } from '../schemas/auth';
+import { RankSchema } from '../schemas/unit';
 import { register } from '../lib/api/auth';
 
 // 군대 테마에 맞는 색상 정의
@@ -318,7 +318,7 @@ const Register: React.FC = () => {
                 required
               >
                 <option value="">선택해주세요</option>
-                {rankOptions.map(rank => (
+                {rankOptions.map((rank: string) => (
                   <option key={rank} value={rank}>
                     {rank}
                   </option>

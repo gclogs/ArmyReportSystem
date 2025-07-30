@@ -1,159 +1,66 @@
 // src/hooks/useReports.ts
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiClient } from '../lib/client';
-import { Report, ReportStatus } from '../schemas/report';
-import { useLocation, useNavigate } from 'react-router-dom';
-import useAuthStore from '../stores/authStore';
-import { getCookie } from '../lib/cookies';
+import { Report } from '../schemas/report';
+import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
 export const useReports = () => {
-  const { userId } = useAuthStore();
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const queryClient = useQueryClient();
 
-  // 인증 상태 확인
-  const accessToken = getCookie('access_token');
+  // API 인터셉터가 인증 처리하므로 더 이상 토큰 업음
 
   // 모든 보고서 가져오기
   const { data: reports, isLoading, error } = useQuery<Report[]>({
     queryKey: ['reports'],
     queryFn: async () => {
       try {
-        // 토큰이 없으면 에러 발생
-        if (!accessToken) {
-          throw new Error('인증이 필요합니다');
-        }
-        
         const response = await getApiClient().get('/reports/list');
         return response.data;
-      } catch (error: any) {
-        console.error('보고서 목록 가져오기 실패:', error);
-        
-        // 401, 403 에러 시 로그인 페이지로 리다이렉트
-        if (error?.response?.status === 401 || error?.response?.status === 403) {
-          navigate('/login', { 
-            state: { 
-              from: location.pathname,
-              message: '세션이 만료되었습니다. 다시 로그인해 주세요.' 
-            } 
-          });
-        }
-        
-        throw error;
-      }
-    },
-    // 토큰이 있을 때만 쿼리 실행
-    enabled: !!accessToken
-  });
-
-  // 선택된 보고서의 댓글 가져오기
-  const { data: comments } = useQuery<Comment[]>({
-    queryKey: ['comments', selectedReport?.report_id],
-    queryFn: async () => {
-      try {
-        // report_id를 숫자로 변환
-        const reportId = Number(selectedReport?.report_id);
-        const response = await getApiClient().get(`/reports/${reportId}/comments`);
-        return response.data;
       } catch (error) {
-        console.error('댓글 가져오기 실패:', error);
+        console.error('보고서 가져오기 실패:', error);
         return [];
       }
-    },
-    enabled: !!selectedReport?.report_id
+    }
   });
 
-  // 보고서 작성 함수
-  const createReport = async (formData: FormData) => {
-    try {
-      // 토큰이 없으면 에러 발생
-      if (!accessToken) {
-        throw new Error('인증이 필요합니다');
-      }
-      
+  // 보고서 작성
+  const writeReport = useMutation({
+    mutationFn: async (formData: FormData) => {
       const response = await getApiClient().post('/reports', formData);
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
       return response;
-    } catch (error: any) {
-      console.error('보고서 작성 실패:', error);
-      
-      // 401, 403 에러 시 로그인 페이지로 리다이렉트
-      if (error?.response?.status === 401 || error?.response?.status === 403) {
-        navigate('/login', { 
-          state: { 
-            from: location.pathname,
-            message: '세션이 만료되었습니다. 다시 로그인해 주세요.' 
-          } 
-        });
-      }
-      
-      throw error;
-    }
-  };
-
-  // 보고서 상태 업데이트 함수
-  const updateReportStatus = async (id: string, status: ReportStatus) => {
-    try {
-      // 토큰이 없으면 에러 발생
-      if (!accessToken) {
-        throw new Error('인증이 필요합니다');
-      }
-      
-      const response = await getApiClient().put(`/reports/${id}/status`, { status });
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reports'] });
-      return response.data;
-    } catch (error: any) {
-      console.error('보고서 상태 업데이트 실패:', error);
-      
-      // 401, 403 에러 시 로그인 페이지로 리다이렉트
-      if (error?.response?.status === 401 || error?.response?.status === 403) {
-        navigate('/login', { 
-          state: { 
-            from: location.pathname,
-            message: '세션이 만료되었습니다. 다시 로그인해 주세요.' 
-          } 
-        });
-      }
-      
-      throw error;
     }
-  };
+  });
 
-  // 댓글 작성 함수
-  const addComment = async (reportId: string, content: string) => {
-    try {
-      // 토큰이 없으면 에러 발생
-      if (!accessToken) {
-        throw new Error('인증이 필요합니다');
-      }
-      
-      // reportId를 숫자로 변환
-      const numericReportId = Number(reportId);
-      const response = await getApiClient().post(`/reports/${numericReportId}/comments`, { content });
-      // 댓글 목록과 보고서 목록 모두 갱신
-      queryClient.invalidateQueries({ queryKey: ['comments', reportId] });
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
+  // 보고서 상태 업데이트 함수 - 인터셉터가 토큰 처리
+  const updateReport = useMutation({
+    mutationFn: async (request: any) => {
+      // Convert string ID to number for backend and use camelCase field name
+      const reportId = parseInt(request.reportId, 10);
+      const response = await getApiClient().put(`/reports/${reportId}`, request);
       return response.data;
-    } catch (error: any) {
-      console.error('댓글 작성 실패:', error);
-      
-      // 401, 403 에러 시 로그인 페이지로 리다이렉트
-      if (error?.response?.status === 401 || error?.response?.status === 403) {
-        navigate('/login', { 
-          state: { 
-            from: location.pathname,
-            message: '세션이 만료되었습니다. 다시 로그인해 주세요.' 
-          } 
-        });
-      }
-      
-      throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
     }
-  };
+  });
+
+  const deleteReport = useMutation({
+    mutationFn: async (request: any) => {
+      // Convert string ID to number for backend and use camelCase field name
+      const reportId = parseInt(request.reportId, 10);
+      const response = await getApiClient().delete(`/reports/${reportId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+    }
+  })
 
   // URL에 따라 필터링된 보고서 목록
   const getFilteredReports = () => {
@@ -170,22 +77,15 @@ export const useReports = () => {
         return false;
       }
       
-      if (path.includes('/reports/recommend')) {
-        // 필독 목록 (우선순위가 'urgent' 또는 'high')
-        return report.priority === 'urgent' || report.priority === 'high';
-      } else if (path.includes('/reports/me')) {
-        // 내 보고서 목록
-        return report.author_id === userId;
-      }
-      
-      return true; // 기본 경로면 모든 보고서 표시
+      // 검색어가 없거나, 제목/내용에 검색어가 포함된 경우
+      return true;
     });
     
     // 최신 탭일 경우 최신 날짜순(내림차순)으로 정렬
     if (location.pathname.includes('/reports/recent')) {
       return [...filteredReports].sort((a, b) => {
-        const dateA = new Date(a.created_at).getTime();
-        const dateB = new Date(b.created_at).getTime();
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
         return dateB - dateA; // 내림차순 (최신순)
       });
     }
@@ -193,35 +93,16 @@ export const useReports = () => {
     return filteredReports;
   };
 
-  // 필터링된 댓글 목록
-  const getFilteredComments = () => {
-    if (!selectedReport || !selectedReport.comments) return [];
-    
-    return selectedReport.comments.filter(comment => {
-      if (searchTerm && 
-          !comment.content?.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
-      return true;
-    });
-  };
-
   const filteredReports = getFilteredReports();
-  const filteredComments = getFilteredComments();
-
   return {
     reports,
-    comments,
     filteredReports,
-    filteredComments,
     isLoading,
     error,
     searchTerm,
     setSearchTerm,
-    selectedReport,
-    setSelectedReport,
-    createReport,
-    updateReportStatus,
-    addComment
+    writeReport,
+    updateReport,
+    deleteReport
   };
 };

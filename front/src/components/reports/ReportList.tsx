@@ -72,6 +72,14 @@ const ReportTitle = styled.h3`
   line-height: 1.4;
 `;
 
+const ImportantTitle = styled.span`
+  color: ${colors.accent};
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
 const ReportContent = styled.p`
   margin: 0 0 16px 0;
   font-size: 14px;
@@ -102,13 +110,13 @@ const StatusBadge = styled.span<{ status: Report['status'] }>`
   gap: 4px;
   background: ${props => {
     switch (props.status) {
-      case 'new':
+      case '신규':
         return '#e3f2fd';
-      case 'in_progress':
+      case '진행중':
         return '#fff3e0';
-      case 'resolved':
+      case '해결됨':
         return '#e8f5e9';
-      case 'rejected':
+      case '반려':
         return '#ffebee';
       default:
         return '#f5f5f5';
@@ -116,13 +124,13 @@ const StatusBadge = styled.span<{ status: Report['status'] }>`
   }};
   color: ${props => {
     switch (props.status) {
-      case 'new':
+      case '신규':
         return '#1976d2';
-      case 'in_progress':
+      case '진행중':
         return '#f57c00';
-      case 'resolved':
+      case '해결됨':
         return '#388e3c';
-      case 'rejected':
+      case '반려':
         return '#d32f2f';
       default:
         return '#757575';
@@ -130,13 +138,13 @@ const StatusBadge = styled.span<{ status: Report['status'] }>`
   }};
   border: 1px solid ${props => {
     switch (props.status) {
-      case 'new':
+      case '신규':
         return '#bbdefb';
-      case 'in_progress':
+      case '진행중':
         return '#ffe0b2';
-      case 'resolved':
+      case '해결됨':
         return '#c8e6c9';
-      case 'rejected':
+      case '반려':
         return '#ffcdd2';
       default:
         return '#e0e0e0';
@@ -155,13 +163,13 @@ const PriorityBadge = styled.span<{ priority: Report['priority'] }>`
   gap: 4px;
   background: ${props => {
     switch (props.priority) {
-      case 'urgent':
+      case '긴급':
         return '#fff1f0';
-      case 'high':
+      case '높음':
         return '#fff7e6';
-      case 'medium':
+      case '중간':
         return '#f6ffed';
-      case 'low':
+      case '낮음':
         return '#e6f7ff';
       default:
         return '#f5f5f5';
@@ -169,13 +177,13 @@ const PriorityBadge = styled.span<{ priority: Report['priority'] }>`
   }};
   color: ${props => {
     switch (props.priority) {
-      case 'urgent':
+      case '긴급':
         return '#cf1322';
-      case 'high':
+      case '높음':
         return '#d46b08';
-      case 'medium':
+      case '중간':
         return '#389e0d';
-      case 'low':
+      case '낮음':
         return '#096dd9';
       default:
         return '#757575';
@@ -183,13 +191,13 @@ const PriorityBadge = styled.span<{ priority: Report['priority'] }>`
   }};
   border: 1px solid ${props => {
     switch (props.priority) {
-      case 'urgent':
+      case '긴급':
         return '#ffa39e';
-      case 'high':
+      case '높음':
         return '#ffd591';
-      case 'medium':
+      case '중간':
         return '#b7eb8f';
-      case 'low':
+      case '낮음':
         return '#91d5ff';
       default:
         return '#e0e0e0';
@@ -233,11 +241,6 @@ const MetaItem = styled.span`
   }
 `;
 
-const ImportantIcon = styled(IoStar)`
-  color: ${colors.highlight} !important;
-  margin-right: 6px;
-`;
-
 const NewLabel = styled.span`
   font-size: 11px;
   font-weight: 600;
@@ -258,13 +261,13 @@ interface ReportListProps {
 const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
   const getStatusText = (status: Report['status']) => {
     switch (status) {
-      case 'new':
+      case '신규':
         return '신규';
-      case 'in_progress':
+      case '진행중':
         return '진행중';
-      case 'resolved':
+      case '해결됨':
         return '해결됨';
-      case 'rejected':
+      case '반려':
         return '반려';
       default:
         return '알 수 없음';
@@ -273,13 +276,13 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
 
   const getPriorityText = (priority: Report['priority']) => {
     switch (priority) {
-      case 'urgent':
+      case '긴급':
         return '긴급';
-      case 'high':
+      case '높음':
         return '높음';
-      case 'medium':
+      case '중간':
         return '중간';
-      case 'low':
+      case '낮음':
         return '낮음';
       default:
         return '알 수 없음';
@@ -322,28 +325,35 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
   
   // 필독 표시할 보고서인지 확인 (priority가 urgent 또는 high)
   const isImportantReport = (report: Report) => {
-    return report.priority === 'urgent' || report.priority === 'high';
+    return report.priority === '긴급' || report.priority === '높음';
   };
 
   return (
     <ListContainer>
       {reports.map((report) => (
-        <ReportItem key={report.report_id} onClick={() => onReportClick(report)}>
+        <ReportItem key={report.reportId} onClick={() => onReportClick(report)}>
           <ReportHeader>
             <ReportTitle>
-              {isImportantReport(report) && <ImportantIcon size={18} />}
-              {report.title}
-              {isNewReport(report.created_at) && <NewLabel>NEW</NewLabel>}
+              {isImportantReport(report) ? (
+                <ImportantTitle>
+                  <IoStar size={18} color="#F6BD60" />
+                  {report.title}
+                </ImportantTitle>
+              ) : (
+                report.title
+              )}
+              {isNewReport(report.createdAt) && <NewLabel>NEW</NewLabel>}
             </ReportTitle>
             <BadgeContainer>
               <PriorityBadge priority={report.priority}>
-                {report.priority === 'urgent' || report.priority === 'high' ? <IoStar size={14} /> : null}
+                {report.priority === '긴급' || report.priority === '높음' ? <IoStar size={14} /> : null}
                 {getPriorityText(report.priority)}
               </PriorityBadge>
               <StatusBadge status={report.status}>
-                {report.status === 'new' ? <IoDocument size={14} /> : 
-                 report.status === 'in_progress' ? <IoTime size={14} /> : 
-                 report.status === 'resolved' ? <IoShield size={14} /> : 
+                {report.status === '신규' ? <IoDocument size={14} /> : 
+                 report.status === '진행중' ? <IoTime size={14} /> : 
+                 report.status === '해결됨' ? <IoShield size={14} /> : 
+                 report.status === '반려' ? <IoShield size={14} /> : 
                  <IoShield size={14} />}
                 {getStatusText(report.status)}
               </StatusBadge>
@@ -354,7 +364,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
             <MetaLeft>
               <MetaItem>
                 <IoPerson size={16} />
-                {report.author_name}
+                {report.authorName}
               </MetaItem>
               {report.location && (
                 <MetaItem>
@@ -365,7 +375,7 @@ const ReportList: React.FC<ReportListProps> = ({ reports, onReportClick }) => {
             </MetaLeft>
             <MetaRight>
               <IoCalendar size={16} />
-              {formatDate(report.created_at)}
+              {formatDate(report.createdAt)}
             </MetaRight>
           </ReportMeta>
         </ReportItem>

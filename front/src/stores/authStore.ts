@@ -1,97 +1,98 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Permission } from "../schemas/auth";
-import { AuthResponse, login, logout } from "../lib/api/auth";
-import { setCookie, deleteCookie } from "../lib/cookies";
+import { logout } from "../lib/api/auth";
+import { deleteCookie, setCookie } from "../lib/cookies";
+import { User } from "../schemas/auth";
+import { devtools } from "zustand/middleware";
 
-interface AuthState {
-    userId: string | null;
-    name: string | null;
-    unitName: string | null;
-    rank: string | null;
-    isLoading: boolean;
+interface AuthStore {
+    user: User;
     isAuthenticated: boolean;
-    setAuthenticated: (userId: string, isAuthenticated: boolean) => void;
-    setAccessToken: (accessToken: string) => void;
-    login: (userId: string, password: string) => Promise<AuthResponse>;
-    logout: () => void;
-    hasPermission: (permission: Permission) => boolean;
+    accessToken: string | null;
+    refreshToken: string;
+    setUser: (user: User | null) => void;
+    logout: () => Promise<void>;
+    setTokens: (accessToken: string | null, refreshToken: string) => void;
 }
 
-const useAuthStore = create<AuthState>()(
-    persist(
-        (set, get) => ({
-            userId: null,
-            name: null,
-            unitName: null,
-            rank: null,
-            isLoading: false,
-            isAuthenticated: false,
-            
-            setAuthenticated: (userId: string, isAuthenticated: boolean) => {
-                set({ userId, isAuthenticated });
-            },
-            
-            setAccessToken: (accessToken: string) => {
-                // 쿠키 유틸리티를 사용하여 토큰 저장
-                setCookie('access_token', accessToken, 1); // 1일 유효
-            },
-            
-            login: async (userId: string, password: string) => {
-                set({ isLoading: true });
+const defaultUser: User = {
+    id: '',
+    unitId: '',
+    unitName: '',
+    name: '',
+    role: 0,
+    rank: '',
+    phoneNumber: '',
+    email: '',
+}
+
+const useAuthStore = create<AuthStore>()(
+    devtools(
+        persist(
+            (set) => ({
+                user: defaultUser,
+                isAuthenticated: false,
+                accessToken: null,
+                refreshToken: '',
                 
-                try {
-                    const response = await login(userId, password);
+                setUser: (user) => {
+                    if (!user) {
+                        return set({
+                            user: defaultUser,
+                            isAuthenticated: false,
+                        })
+                    }
                     
-                    // 토큰 쿠키에 저장
-                    const { access_token, user_id, name, unit_name, rank } = response;
-                    get().setAccessToken(access_token);
-                    
-                    // 사용자 인증 상태 설정
                     set({ 
-                        userId: user_id, 
-                        name,
-                        unitName: unit_name,
-                        rank,
-                        isAuthenticated: true, 
-                        isLoading: false 
-                    });
+                        user: user,
+                        isAuthenticated: true,
+                     });
+                },
+
+                setTokens: (accessToken: string | null, refreshToken: string) => {
+                    // 쿠키에 토큰 설정 (accessToken이 null이 아닌 경우에만)
+                    if (accessToken) {
+                        setCookie('accessToken', accessToken, 1);
+                    }
+                    if (refreshToken) {
+                        setCookie('refreshToken', refreshToken, 7); // refresh_token은 더 오래 유지
+                    }
                     
-                    return response;
-                } catch (error) {
-                    set({ isLoading: false });
-                    throw error;
-                }
-            },
-            
-            logout: async () => {
-                try {
-                    await logout();
-                } catch (error) {
-                    console.error("로그아웃 실패:", error);
-                }
+                    set({
+                        accessToken: accessToken,
+                        refreshToken: refreshToken,
+                    });
+                },
                 
-                deleteCookie('access_token');
-                set({ userId: null, name: null, unitName: null, rank: null, isAuthenticated: false });
-            },
-            
-            hasPermission: (permission: Permission) => {
-                const { userId, isAuthenticated } = get();
-                if (!userId || !isAuthenticated) return false;
-                
-                return true;
-            }
-        }),
-        {
-            name: 'auth',
-            partialize: (state) => ({
-                userId: state.userId,
-                name: state.name,
-                unitName: state.unitName,
-                rank: state.rank,
-                isAuthenticated: state.isAuthenticated
+                logout: async () => {
+                    try {
+                        await logout(); // 서버에 로그아웃 요청
+                    } catch (error) {
+                        console.error("로그아웃 실패:", error);
+                    } finally {
+                        // 항상 로컬 상태와 쿠키는 초기화
+                        deleteCookie('accessToken');
+                        deleteCookie('refreshToken');
+                        
+                        set({ 
+                            user: defaultUser, 
+                            isAuthenticated: false, 
+                            accessToken: null,
+                            refreshToken: '',
+                        });
+                    }
+                }
             }),
-        }
+            {
+                name: 'user',
+                partialize: (state) => ({
+                    user: state.user,
+                    isAuthenticated: state.isAuthenticated,
+                    accessToken: state.accessToken,
+                    refreshToken: state.refreshToken,
+                }),
+            }
+        )
     )
 );
 

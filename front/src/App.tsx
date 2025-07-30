@@ -1,17 +1,16 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import Layout from './layouts/Layout';
 import Dashboard from './pages/Dashboard';
 import Reports from './pages/Reports';
-import Approvals from './pages/Approvals';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import GlobalStyle from './GlobalStyle';
 import './App.css'
-import { getCookie } from './lib/cookies';
 import ReportDetailPage from './pages/ReportDetailPage';
 import ReportWritePage from './pages/ReportWritePage';
+import { ProtectedRoute } from './ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,56 +22,26 @@ const queryClient = new QueryClient({
   },
 });
 
-function AuthRedirect({ children }: { children: React.ReactNode }) {
-  const accessToken = getCookie('access_token');
-
-  if (accessToken) {
-    return <Navigate to="/" replace />;
-  }
-  return <>{children}</>;
-}
-
-function AuthCheck({ children }: { children: React.ReactNode }) {
-  const accessToken = getCookie('access_token');
-  
-  if (!accessToken) {
-    return <Navigate to="/login" replace />;
-  }
-  return <>{children}</>
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <GlobalStyle />
+        <ProtectedRoute>
         <Routes>
-          <Route path="/login" element={
-            <AuthRedirect>
-              <Login />
-            </AuthRedirect>
-            } />
-          <Route path="/register" element={
-            <AuthRedirect>
-              <Register />
-            </AuthRedirect>
-          } />
-          <Route path="/" element={
-            <AuthCheck>
-              <Layout />
-            </AuthCheck>
-          }>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="reports" element={<Reports />} />
             <Route path="reports/:id" element={<ReportDetailPage />} />
             <Route path="reports/write" element={<ReportWritePage />} />
             <Route path="reports/recommend" element={<Reports />} />
             <Route path="reports/recent" element={<Reports />} />
-            <Route path="approvals" element={<Approvals />} />
           </Route>
-          
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </ProtectedRoute>
       </Router>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
