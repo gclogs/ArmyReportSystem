@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.gclogs.armyreportsystem.mapper.TokenMapper">
+<mapper namespace="com.gclogs.armyreportsystem.auth.mapper.TokenMapper">
+    
+    <!-- Token 객체를 위한 resultMap 정의 -->
+    <resultMap id="tokenResultMap" type="com.gclogs.armyreportsystem.auth.domain.Token">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="refreshToken" column="refresh_token" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="isActive" column="is_active" />
+    </resultMap>
 
     <insert id="saveRefreshToken">
         INSERT INTO user_tokens (user_id, refresh_token, created_at, updated_at, is_active)
-        VALUES (#{user_id}, #{refresh_token}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true)
+        VALUES (#{userId}, #{refreshToken}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true)
             ON DUPLICATE KEY UPDATE
-             refresh_token = #{refresh_token},
+             refresh_token = #{refreshToken},
              updated_at = CURRENT_TIMESTAMP,
              is_active = true
     </insert>
@@ -14,14 +24,14 @@
     <!-- 사용자의 리프레시 토큰 삭제 -->
     <delete id="deleteRefreshToken" parameterType="string">
         DELETE FROM user_tokens
-        WHERE user_id = #{user_id}
+        WHERE user_id = #{userId}
     </delete>
 
     <!-- 리프레시 토큰을 사용하여 사용자 ID 조회 -->
-    <select id="findUserIdByRefreshToken" resultType="string">
+    <select id="findUserIdByRefreshToken" parameterType="string" resultType="string">
         SELECT user_id
         FROM user_tokens
-        WHERE refresh_token = #{refresh_token}
+        WHERE refresh_token = #{refreshToken}
         AND is_active = true
     </select>
 
