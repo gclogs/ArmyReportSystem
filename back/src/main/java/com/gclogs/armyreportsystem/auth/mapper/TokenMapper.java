@@ -5,9 +5,9 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface TokenMapper {
-    void saveRefreshToken(@Param("user_id") String userId, @Param("refresh_token") String refreshToken);
+    void saveRefreshToken(String userId, String refreshToken);
 
-    void deleteRefreshToken(@Param("user_id") String userId);
+    void deleteRefreshToken(String userId);
     
-    String findUserIdByRefreshToken(@Param("refresh_token") String refreshToken);
+    String findUserIdByRefreshToken(String refreshToken);
 }

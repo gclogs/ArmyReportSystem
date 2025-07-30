@@ -67,7 +67,7 @@ public class JwtTokenProvider {
                 .setSubject(String.valueOf(userId))
                 .setIssuedAt(now)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .claim("user_id", userId)
+                .claim("userId", userId)
                 .setExpiration(accessExpiryDate)
                 .compact();
     }
@@ -78,7 +78,7 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + tokenValidityInSeconds * 1000);
         
         return Jwts.builder()
-                .claim("user_id", userId)
+                .claim("userId", userId)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))

@@ -34,15 +34,19 @@ public class TokenService {
         tokenMapper.saveRefreshToken(userId, refreshToken);
 
         return TokenResponse.builder()
-                .user_id(userId)
+                .userId(userId)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .role(user.getRole())
+                .phoneNumber(user.getPhoneNumber())
+                .unitName(user.getUnitName())
                 .name(user.getName())
                 .rank(user.getRank())
-                .unit_name(user.getUnit_name())
-                .access_token(accessToken)
-                .refresh_token(refreshToken)
-                .token_type("Bearer")
-                .access_token_expires_in(86400L)
-                .refresh_token_expires_in(604800L)
+                .email(user.getEmail())
+                .createdAt(user.getCreatedAt())
+                .accessTokenExpiresIn(86400L) // 1일
+                .refreshTokenExpiresIn(604800L) // 7일
+                .tokenType("Bearer")
                 .success(true)
                 .message("토큰이 성공적으로 생성되었습니다.")
                 .build();
@@ -53,23 +57,23 @@ public class TokenService {
         try {
             if (!jwtTokenProvider.validateToken(refreshToken)) {
                 return TokenResponse.builder()
-                        .user_id("error")
-                        .access_token("")
-                        .refresh_token("")
-                        .token_type("")
+                        .userId("error")
+                        .accessToken("")
+                        .refreshToken("")
+                        .tokenType("")
                         .success(false)
                         .message("유효하지 않은 리프레시 토큰입니다.")
                         .build();
             }
 
-            String userId = jwtTokenProvider.getClaimsFromToken(refreshToken).get("user_id", String.class);
+            String userId = jwtTokenProvider.getClaimsFromToken(refreshToken).get("userId", String.class);
             String newAccessToken = jwtTokenProvider.createAccessToken(userId);
 
             return TokenResponse.builder()
-                    .user_id(userId)
-                    .access_token(newAccessToken)
-                    .token_type("Bearer")
-                    .access_token_expires_in(86400L) // 1일
+                    .userId(userId)
+                    .accessToken(newAccessToken)
+                    .tokenType("Bearer")
+                    .accessTokenExpiresIn(86400L) // 1일
                     .success(true)
                     .message("액세스 토큰이 갱신되었습니다.")
                     .build();
@@ -83,7 +87,7 @@ public class TokenService {
 
     @Transactional
     public String getUserIdFromToken(String token) {
-        return jwtTokenProvider.getClaimsFromToken(token).get("user_id", String.class);
+        return jwtTokenProvider.getClaimsFromToken(token).get("userId", String.class);
     }
 
     @Transactional

@@ -15,8 +15,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.gclogs.armyreportsystem.security.jwt.JwtAuthenticationFilter;
-import com.gclogs.armyreportsystem.security.jwt.JwtTokenProvider;
+import com.gclogs.armyreportsystem.auth.security.jwt.JwtAuthenticationFilter;
+import com.gclogs.armyreportsystem.auth.security.jwt.JwtTokenProvider;
 
 import java.util.Arrays;
 

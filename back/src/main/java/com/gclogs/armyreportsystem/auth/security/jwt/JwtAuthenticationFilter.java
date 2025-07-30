@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtTokenProvider.validateToken(token)) {
                 // Claims에서 user_id를 문자열로 추출
                 Claims claims = jwtTokenProvider.getClaimsFromToken(token);
-                String userId = claims.get("user_id", String.class);
+                String userId = claims.get("userId", String.class);
                 
                 // 사용자 ID를 principal로 설정
                 UsernamePasswordAuthenticationToken authentication = 
@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 
                 // 요청 속성에 user_id 설정 (컨트롤러에서 @RequestAttribute로 접근 가능)
-                request.setAttribute("user_id", userId);
+                request.setAttribute("userId", userId);
             }
         }
         
