@@ -36,20 +36,6 @@ CREATE TABLE IF NOT EXISTS report_access_logs (
     INDEX idx_access_time (access_time)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 보고서 첨부파일 테이블
-CREATE TABLE IF NOT EXISTS report_files (
-    file_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    report_id BIGINT NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(512) NOT NULL,
-    file_size BIGINT NOT NULL,
-    file_type VARCHAR(100) NOT NULL,
-    upload_time TIMESTAMP NOT NULL,
-
-    FOREIGN KEY (report_id) REFERENCES reports(report_id),
-    INDEX idx_report_id (report_id)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
 -- 보고서 댓글 테이블
 CREATE TABLE IF NOT EXISTS report_comments (
     comment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -67,6 +53,14 @@ CREATE TABLE IF NOT EXISTS report_comments (
     INDEX idx_report_id (report_id),
     INDEX idx_author_id (author_id),
     INDEX idx_is_deleted (is_deleted)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS report_locations (
+    location_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT NOT NULL,
+    report_location VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 보안 강화: 데이터베이스 이벤트 트리거
