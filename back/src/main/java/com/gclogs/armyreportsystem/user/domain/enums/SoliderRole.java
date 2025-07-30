@@ -1,7 +1,6 @@
-// AuthorityRole.java 파일
 package com.gclogs.armyreportsystem.user.domain.enums;
 
-public enum AuthorityRole {
+public enum SoliderRole {
     PRESIDENT(1),        // 대통령
     JOINT_CHIEF(2),      // 합참의장
     ARMY_CHIEF(3),       // 육군참모총장
@@ -18,7 +17,7 @@ public enum AuthorityRole {
 
     private final int level;
 
-    AuthorityRole(int level) {
+    SoliderRole(int level) {
         this.level = level;
     }
 
@@ -26,7 +25,7 @@ public enum AuthorityRole {
         return level;
     }
 
-    public boolean hasAuthorityOver(AuthorityRole other) {
+    public boolean hasAuthorityOver(SoliderRole other) {
         return this.level < other.level;  // 레벨이 낮을수록 권한이 높음
     }
 }

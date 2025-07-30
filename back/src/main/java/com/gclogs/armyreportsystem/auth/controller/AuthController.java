@@ -8,7 +8,7 @@ import com.gclogs.armyreportsystem.auth.dto.TokenRequest;
 import com.gclogs.armyreportsystem.auth.dto.TokenResponse;
 import com.gclogs.armyreportsystem.auth.service.TokenService;
 import com.gclogs.armyreportsystem.auth.util.CookieUtil;
-import com.gclogs.armyreportsystem.dto.*;
+import com.gclogs.armyreportsystem.user.domain.enums.SoliderRole;
 import com.gclogs.armyreportsystem.user.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +28,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
-        request.setRole("SOLDIER"); // UserRole = 'SOLDIER' | 'OFFICER(장교)' | 'ADMIN(총관리자)'
+        request.setRole(SoliderRole.SOLDIER.getLevel());
         
         RegisterResponse registerData = userService.register(request);
         return ResponseEntity.ok(registerData);
@@ -38,23 +38,25 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResponse loginResponse = userService.login(request);
 
+        System.out.println(loginResponse.getMessage());
+
         if (!loginResponse.isSuccess()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(loginResponse);
         }
 
-        TokenResponse tokenData = tokenService.createTokens(request.getUser_id());
+        TokenResponse tokenData = tokenService.createTokens(request.getUserId());
         CookieUtil.addRefreshTokenCookie(response, tokenData);
 
         return ResponseEntity.ok(tokenData);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@CookieValue(name = "refresh_token", required = false) String refreshToken,
+    public ResponseEntity<TokenResponse> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken,
                                                @RequestBody(required = false) TokenRequest request,
                                                HttpServletResponse response) {
         // 쿠키에서 리프레시 토큰을 가져오거나, 요청 본문에서 가져옴
         String tokenToUse = refreshToken != null ? refreshToken :
-                           (request != null ? request.getRefresh_token() : null);
+                           (request != null ? request.getRefreshToken() : null);
 
         if (tokenToUse == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -71,7 +73,7 @@ public class AuthController {
         }
 
         // 새로운 리프레시 토큰이 있다면 쿠키 갱신 (토큰 로테이션 구현 시)
-        if (tokenData.getRefresh_token() != null) {
+        if (tokenData.getRefreshToken() != null) {
             CookieUtil.addRefreshTokenCookie(response, tokenData);
         }
 
