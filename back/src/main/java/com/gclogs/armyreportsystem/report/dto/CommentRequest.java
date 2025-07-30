@@ -15,7 +15,7 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 public class CommentRequest {
     @NotNull(message = "보고서 ID는 필수 항목입니다")
-    private Long report_id;               // 보고서 ID
+    private Long reportId;               // 보고서 ID
     
     @NotBlank(message = "댓글 내용은 필수 항목입니다")
     private String content;                // 댓글 내용

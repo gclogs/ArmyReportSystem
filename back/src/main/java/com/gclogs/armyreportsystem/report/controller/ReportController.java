@@ -1,23 +1,17 @@
 package com.gclogs.armyreportsystem.report.controller;
 
 import com.gclogs.armyreportsystem.auth.service.TokenService;
-import com.gclogs.armyreportsystem.report.dto.CommentResponse;
 import com.gclogs.armyreportsystem.report.dto.ReportRequest;
 import com.gclogs.armyreportsystem.report.dto.ReportResponse;
-import com.gclogs.armyreportsystem.report.service.CommentService;
 import com.gclogs.armyreportsystem.report.service.ReportService;
-import com.gclogs.armyreportsystem.user.domain.enums.AuthorityRole;
-import com.gclogs.armyreportsystem.user.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -67,7 +61,7 @@ public class ReportController {
             return  ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // 권한이 없으면 보고서 수정 진행
+        // 권한이 있으면 보고서 수정 진행
         ReportResponse response = reportService.editReport(reportId, request);
         if (!response.isSuccess()) {
             return ResponseEntity.badRequest().body(response);

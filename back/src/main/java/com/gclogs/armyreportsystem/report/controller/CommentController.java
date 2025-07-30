@@ -24,9 +24,9 @@ public class CommentController {
     public ResponseEntity<?> getCommentsByReportId(@RequestParam("reportId") Long reportId) {
         var comments = commentService.getCommentsByReportId(reportId);
         
-        // is_deleted가 false인 댓글만 필터링
+        // isDeleted가 false인 댓글만 필터링
         var nonDeletedComments = comments.stream()
-                .filter(comment -> !comment.is_deleted())
+                .filter(comment -> !comment.isDeleted())
                 .collect(Collectors.toList());
                 
         return ResponseEntity.ok(nonDeletedComments);
@@ -51,7 +51,6 @@ public class CommentController {
 
         String token = header.replace("Bearer ", "");
         String userId = tokenService.getUserIdFromToken(token);
-        System.out.print("User ID: " + userId);
 
         return ResponseEntity.ok(commentService.updateComment(commentId, userId, request));
     }

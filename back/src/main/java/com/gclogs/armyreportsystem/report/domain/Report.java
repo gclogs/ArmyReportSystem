@@ -10,18 +10,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Report {
-    private String author_id;
-    private String author_name;
-    private String author_rank;
+    private String authorId;
+    private String authorName;
+    private String authorRank;
 
-    private Long report_id;
+    private Long reportId;
     private String type;
     private String title;
     private String content;
     private String priority;
     private String status;
-    private boolean is_deleted;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
-    private LocalDateTime deleted_at;
+    private boolean isDeleted;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 }

@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +49,7 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(String userId, CommentRequest request) {
         // 보고서 존재 여부 확인
-        Report report = reportMapper.findReportById(request.getReport_id());
+        Report report = reportMapper.findReportById(request.getReportId());
         if (report == null) {
             return CommentResponse.builder()
                     .success(false)
@@ -69,14 +68,14 @@ public class CommentService {
 
         // 신규 댓글 생성
         Comment comment = Comment.builder()
-                .report_id(request.getReport_id())
-                .author_id(user.getUser_id())
-                .author_name(user.getName())
-                .author_rank(user.getRank())
+                .reportId(request.getReportId())
+                .authorId(user.getUserId())
+                .authorName(user.getName())
+                .authorRank(user.getRank())
                 .content(request.getContent())
-                .created_at(LocalDateTime.now())
-                .updated_at(LocalDateTime.now())
-                .is_deleted(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .isDeleted(false)
                 .build();
 
         // DB 저장
@@ -97,7 +96,7 @@ public class CommentService {
             }
 
             // 권한 확인 (작성자만 수정 가능)
-            if (!comment.getAuthor_id().equals(userId)) {
+            if (!comment.getAuthorId().equals(userId)) {
                 return CommentResponse.builder()
                         .success(false)
                         .message("댓글 수정 권한이 없습니다.")
@@ -106,7 +105,7 @@ public class CommentService {
 
             // 댓글 내용 및 수정일시 업데이트
             comment.setContent(request.getContent());
-            comment.setUpdated_at(LocalDateTime.now());
+            comment.setUpdatedAt(LocalDateTime.now());
 
             // DB 업데이트
             commentMapper.updateComment(comment);
@@ -133,7 +132,7 @@ public class CommentService {
         }
 
         // 권한 확인 (작성자만 삭제 가능)
-        if (!comment.getAuthor_id().equals(userId)) {
+        if (!comment.getAuthorId().equals(userId)) {
             return CommentResponse.builder()
                     .success(false)
                     .message("댓글 삭제 권한이 없습니다.")
@@ -141,23 +140,23 @@ public class CommentService {
         }
 
         // 논리적 삭제 처리
-        comment.set_deleted(true);
-        comment.setDeleted_at(LocalDateTime.now());
+        comment.setDeleted(true);
+        comment.setDeletedAt(LocalDateTime.now());
 
         // DB 업데이트
-        commentMapper.deleteComment(comment.getComment_id());
+        commentMapper.deleteComment(comment.getCommentId());
 
         return CommentResponse.builder()
                 .success(true)
                 .message("댓글이 성공적으로 삭제되었습니다.")
-                .comment_id(comment.getComment_id())
-                .report_id(comment.getReport_id())
-                .author_id(comment.getAuthor_id())
-                .author_name(comment.getAuthor_name())
+                .commentId(comment.getCommentId())
+                .reportId(comment.getReportId())
+                .authorId(comment.getAuthorId())
+                .authorName(comment.getAuthorName())
                 .content(comment.getContent())
-                .created_at(comment.getCreated_at())
-                .updated_at(comment.getUpdated_at())
-                .is_deleted(true)
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .isDeleted(true)
                 .build();
     }
 
@@ -165,15 +164,15 @@ public class CommentService {
     private CommentResponse convertToResponse(Comment comment) {
         return CommentResponse.builder()
                 .success(true)
-                .comment_id(comment.getComment_id())
-                .report_id(comment.getReport_id())
-                .author_id(comment.getAuthor_id())
-                .author_name(comment.getAuthor_name())
-                .author_rank(comment.getAuthor_rank())
+                .commentId(comment.getCommentId())
+                .reportId(comment.getReportId())
+                .authorId(comment.getAuthorId())
+                .authorName(comment.getAuthorName())
+                .authorRank(comment.getAuthorRank())
                 .content(comment.getContent())
-                .created_at(comment.getCreated_at())
-                .updated_at(comment.getUpdated_at())
-                .is_deleted(comment.is_deleted())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .isDeleted(comment.isDeleted())
                 .build();
     }
 }

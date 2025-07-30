@@ -12,14 +12,14 @@ import lombok.*;
 public class CommentResponse {
     private boolean success;
     private String message;
-    private Long comment_id;
-    private Long report_id;
-    private String author_id;
-    private String author_name;
-    private String author_rank;
+    private Long commentId;
+    private Long reportId;
+    private String authorId;
+    private String authorName;
+    private String authorRank;
     private String content;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
-    private boolean is_deleted;
-    private LocalDateTime deleted_at;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private boolean isDeleted;
+    private LocalDateTime deletedAt;
 }
