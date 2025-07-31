@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import ReportWriteItem from '../components/reports/write/ReportWriteItem';
+import ReportWriteItem from '../components/reports/write/ReportWriteItme';
 
 // 군부대 디자인 테마 색상
 const COLORS = {
