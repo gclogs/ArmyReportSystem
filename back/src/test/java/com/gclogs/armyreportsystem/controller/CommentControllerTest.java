@@ -1,10 +1,11 @@
 package com.gclogs.armyreportsystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gclogs.armyreportsystem.dto.CommentRequest;
-import com.gclogs.armyreportsystem.dto.CommentResponse;
-import com.gclogs.armyreportsystem.service.CommentService;
-import com.gclogs.armyreportsystem.service.TokenService;
+import com.gclogs.armyreportsystem.auth.service.TokenService;
+import com.gclogs.armyreportsystem.report.dto.CommentRequest;
+import com.gclogs.armyreportsystem.report.dto.CommentResponse;
+import com.gclogs.armyreportsystem.report.service.CommentService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -90,7 +91,7 @@ public class CommentControllerTest {
     void createCommentTest() throws Exception {
         // given
         when(tokenService.getUserIdFromToken(anyString())).thenReturn(TEST_USER_ID);
-        when(commentService.createComment(eq(TEST_REPORT_ID), eq(TEST_USER_ID), any(CommentRequest.class)))
+        when(commentService.createComment(eq(TEST_USER_ID), any(CommentRequest.class)))
                 .thenReturn(commentResponse);
 
         // when & then
@@ -219,7 +220,7 @@ public class CommentControllerTest {
                 .build();
 
         when(tokenService.getUserIdFromToken(anyString())).thenReturn(TEST_USER_ID);
-        when(commentService.createComment(eq(nonExistingReportId), eq(TEST_USER_ID), any(CommentRequest.class)))
+        when(commentService.createComment(eq(TEST_USER_ID), any(CommentRequest.class)))
                 .thenReturn(errorResponse);
 
         // when & then

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS user (
     user_id VARCHAR(30) PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
     rank VARCHAR(16) NOT NULL,
-    role VARCHAR(16) NOT NULL,
+    role BIGINT NOT NULL,
     name VARCHAR(16) NOT NULL,
     unit_name VARCHAR(30) NOT NULL,
     phone_number VARCHAR(16) NOT NULL,
@@ -28,6 +28,5 @@ CREATE TABLE IF NOT EXISTS user_tokens (
     CONSTRAINT fk_user_tokens_user FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Create separate indices for better performance
 CREATE INDEX idx_refresh_token ON user_tokens (refresh_token);
 CREATE INDEX idx_is_active ON user_tokens (is_active);

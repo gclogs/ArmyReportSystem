@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS report_locations (
     report_id BIGINT NOT NULL,
     report_location VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 보안 강화: 데이터베이스 이벤트 트리거
