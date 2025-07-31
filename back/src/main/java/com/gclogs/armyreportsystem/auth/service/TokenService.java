@@ -1,5 +1,6 @@
 package com.gclogs.armyreportsystem.auth.service;
 
+import com.gclogs.armyreportsystem.auth.domain.Token;
 import com.gclogs.armyreportsystem.auth.dto.TokenResponse;
 import com.gclogs.armyreportsystem.auth.mapper.TokenMapper;
 import com.gclogs.armyreportsystem.auth.security.jwt.JwtTokenProvider;
@@ -44,7 +45,7 @@ public class TokenService {
                 .rank(user.getRank())
                 .email(user.getEmail())
                 .createdAt(user.getCreatedAt())
-                .accessTokenExpiresIn(86400L) // 1일
+                .accessTokenExpiresIn(1800L) // 30분 (실제 설정값과 일치)
                 .refreshTokenExpiresIn(604800L) // 7일
                 .tokenType("Bearer")
                 .success(true)
@@ -54,35 +55,45 @@ public class TokenService {
 
     @Transactional
     public TokenResponse refreshAccessToken(String refreshToken) {
-        try {
-            if (!jwtTokenProvider.validateToken(refreshToken)) {
-                return TokenResponse.builder()
-                        .userId("error")
-                        .accessToken("")
-                        .refreshToken("")
-                        .tokenType("")
-                        .success(false)
-                        .message("유효하지 않은 리프레시 토큰입니다.")
-                        .build();
-            }
+        String userId = tokenMapper.findUserIdByRefreshToken(refreshToken);
 
-            String userId = jwtTokenProvider.getClaimsFromToken(refreshToken).get("userId", String.class);
-            String newAccessToken = jwtTokenProvider.createAccessToken(userId);
-
-            return TokenResponse.builder()
-                    .userId(userId)
-                    .accessToken(newAccessToken)
-                    .tokenType("Bearer")
-                    .accessTokenExpiresIn(86400L) // 1일
-                    .success(true)
-                    .message("액세스 토큰이 갱신되었습니다.")
-                    .build();
-        } catch (Exception e) {
+        if(userId == null) {
             return TokenResponse.builder()
                     .success(false)
-                    .message("토큰 갱신 중 오류가 발생했습니다: " + e.getMessage())
+                    .message("리프레시 토큰이 제공되지 않았습니다.")
                     .build();
         }
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+
+        return TokenResponse.builder()
+                .userId(userId)
+                .accessToken(newAccessToken)
+                .accessTokenExpiresIn(1800L) // 30분 (실제 설정값과 일치)
+                .tokenType("Bearer")
+                .success(true)
+                .message("토큰이 성공적으로 리프레시 되었습니다.")
+                .build();
+    }
+
+    @Transactional
+    public TokenResponse updateTokenLastUsed(String refreshToken) {
+        // 1. refreshToken으로 userId 추출
+        String userId = tokenMapper.findUserIdByRefreshToken(refreshToken);
+        if(userId == null) {
+            return TokenResponse.builder()
+                    .success(false)
+                    .message("리프레시 토큰이 제공되지 않았습니다.")
+                    .build();
+        }
+
+        // 2. userId를 통해 해당 사용자의 토큰 사용 시간 업데이트
+        tokenMapper.updateLastUsedAtByUserId(userId);
+
+        return TokenResponse.builder()
+                .success(true)
+                .message("토큰 사용 시간을 업데이트 하었습니다.")
+                .build();
     }
 
     @Transactional

@@ -51,31 +51,17 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken,
+    public ResponseEntity<TokenResponse> refresh(@CookieValue(name = "refreshToken", required = true) String refreshToken,
                                                @RequestBody(required = false) TokenRequest request,
                                                HttpServletResponse response) {
-        // 쿠키에서 리프레시 토큰을 가져오거나, 요청 본문에서 가져옴
-        String tokenToUse = refreshToken != null ? refreshToken :
-                           (request != null ? request.getRefreshToken() : null);
 
-        if (tokenToUse == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(TokenResponse.builder()
-                          .success(false)
-                          .message("리프레시 토큰이 제공되지 않았습니다.")
-                          .build());
-        }
-
-        TokenResponse tokenData = tokenService.refreshAccessToken(tokenToUse);
+        TokenResponse tokenData = tokenService.refreshAccessToken(refreshToken);
 
         if (!tokenData.isSuccess()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(tokenData);
         }
 
-        // 새로운 리프레시 토큰이 있다면 쿠키 갱신 (토큰 로테이션 구현 시)
-        if (tokenData.getRefreshToken() != null) {
-            CookieUtil.addRefreshTokenCookie(response, tokenData);
-        }
+        tokenService.updateTokenLastUsed(refreshToken);
 
         return ResponseEntity.ok(tokenData);
     }

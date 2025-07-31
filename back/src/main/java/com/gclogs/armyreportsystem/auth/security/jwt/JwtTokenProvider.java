@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,9 +26,14 @@ public class JwtTokenProvider {
     
     @Value("${jwt.secret}")
     private String secretKey;
-    
-    @Value("${jwt.token-validity-in-seconds:86400}")
-    private long tokenValidityInSeconds;
+
+    @Value("${jwt.access-token-validity:1800}")
+    private long accessTokenValidityInSeconds;
+
+    @Value("${jwt.refresh-token-validity:604800}") // 7일
+    private long refreshTokenValidityInSeconds;
+
+    private final SecureRandom secureRandom = new SecureRandom();
 
     /**
      * 토큰 검증 결과를 나타내는 열거형
@@ -61,7 +67,7 @@ public class JwtTokenProvider {
 
     public String createAccessToken(String userId) {
         Date now = new Date();
-        Date accessExpiryDate = new Date(now.getTime() + tokenValidityInSeconds * 1000);
+        Date accessExpiryDate = new Date(now.getTime() + accessTokenValidityInSeconds);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
@@ -74,15 +80,11 @@ public class JwtTokenProvider {
 
     // JWT 토큰 생성
     public String createRefreshToken(String userId) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + tokenValidityInSeconds * 1000);
-        
-        return Jwts.builder()
-                .claim("userId", userId)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .compact();
+        byte [] randomBytes = new byte[32];
+        secureRandom.nextBytes(randomBytes);
+        String refreshToken = Base64.getEncoder().encodeToString(randomBytes);
+
+        return refreshToken;
     }
 
     // 토큰에서 사용자 ID 추출
